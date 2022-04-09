@@ -134,11 +134,16 @@
                   <span class="app-brand-text demo text-body fw-bolder">Sneat</span>
                 </a>
               </div>
+              {% if session['login']== False %}
+              <div class="alert alert-primary alert-dismissible" role="alert">
+                The username of password you entered is incorrect. Please try again
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+              {% endif %}
               <!-- /Logo -->
               <h4 class="mb-2">Welcome to Educative! 👋</h4>
               <p class="mb-4">Please sign-in to your account and start the adventure</p>
-
-              <form id="formAuthentication" class="mb-3" action="index.html" method="POST">
+              <form id="formAuthentication" class="mb-3" action="http://127.0.0.1:5000/index.html" method="POST">
                 <div class="mb-3">
                   <label for="email" class="form-label">Email or Username</label>
                   <input

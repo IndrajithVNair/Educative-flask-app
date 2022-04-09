@@ -1,6 +1,17 @@
-from flask import Flask, render_template
+from distutils.log import debug
+from flask import Flask, render_template,request,redirect,session,Response,url_for,flash
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
+
+# Enter your database connection details below
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'educative'
+
+# Intialize MySQL
+mysql = MySQL(app)
 
 @app.route('/auth-forgot-password-basic.html')
 def auth_forgot_password_basic():
@@ -46,10 +57,59 @@ def forms_input_groups():
 def icons_boxicons():
     return render_template('icons-boxicons.html')
 
-@app.route('/index.html')
+@app.route('/index.html',methods=['GET', 'POST'])
+def check_user():
+    session.pop('login',None)  
+    username=request.form['email-username']
+    password=request.form['password']
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM users")
+    mysql.connection.commit()
+    res=cur.fetchall()
+    user_type=2
+    account_status=1
+    for row in res:
+        if (username==row[1] and password==row[4] and account_status==row[9]):
+            user_type=row[8]
+            Flag= True
+            session['login']=True
+
+            # using the flag= True check for the user role
+        
+        else:
+            # when the username or password is not found or when the account is not operational, then
+            #redirect to the login page and display the error message
+            session['login']=False
+            return redirect('/')
+        if(Flag):
+            if(user_type==0):
+                #render admin dashboard
+                # set user session as admin session
+                return redirect('/admin-dashboard')
+            elif(user_type==1):
+                return redirect('/teacher-dashboard')
+            else:
+                return redirect('/student-dashboard')
+
+
+
+            
+
+@app.route('/admin-dashboard')
+def admin_dashboard():
+    return render_template('index_admin.html')
+
+@app.route('/teacher-dashboard')
+def teacher_dashboard():
+    return render_template('index_teacher.html')
+
+@app.route('/student-dashboard')
+def student_dashboard():
+    return render_template('index_student.html')
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('auth-login-basic.html')
 
 @app.route('/layouts-blank.html')
 def ayouts_blank():
@@ -172,4 +232,5 @@ def ui_typography():
     return render_template('ui-typography.html')
 
 if __name__ == '__main__':
-    app.run()
+    app.secret_key = 'super secret key'
+    app.run(debug=True)
