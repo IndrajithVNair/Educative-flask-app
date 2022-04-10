@@ -66,30 +66,34 @@ def check_user():
     cur.execute("SELECT * FROM users")
     mysql.connection.commit()
     res=cur.fetchall()
-    user_type=2
-    account_status=1
+    global Flag
+    Flag= False
+    global user_type
+    user_type = 0
+    account_status=2
     for row in res:
         if (username==row[1] and password==row[4] and account_status==row[9]):
             user_type=row[8]
             Flag= True
             session['login']=True
+            break
 
             # using the flag= True check for the user role
         
-        else:
-            # when the username or password is not found or when the account is not operational, then
-            #redirect to the login page and display the error message
-            session['login']=False
-            return redirect('/')
-        if(Flag):
+    if(Flag):
             if(user_type==0):
                 #render admin dashboard
                 # set user session as admin session
                 return redirect('/admin-dashboard')
             elif(user_type==1):
                 return redirect('/teacher-dashboard')
-            else:
+            elif(user_type==2):
                 return redirect('/student-dashboard')
+    else:
+            # when the username or password is not found or when the account is not operational, then
+            #redirect to the login page and display the error message
+            session['login']=False
+            return redirect('/')
 
 
 
@@ -110,6 +114,41 @@ def student_dashboard():
 @app.route('/')
 def index():
     return render_template('auth-login-basic.html')
+
+@app.route('/user-register',methods=['GET','POST'])
+def user_register():
+    name=request.form['Name']
+    register_num=request.form['RegisterNumber']
+    email=request.form['email']
+    phone=request.form['phoneNumber']
+    password=request.form['Password']
+    department=request.form['Department']
+    country=request.form['Country']
+    zipcode=request.form['zipCode']
+    state=request.form['state']
+    address=request.form['address']
+    age=request.form['Age']
+    role=2
+    account_status=0
+    cls=1
+
+
+    try:
+        cur=mysql.connection.cursor()
+        cur.execute("INSERT INTO users(Name,Dept,Age,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,age,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num))
+        mysql.connection.commit()
+        return redirect('/')
+    except mysql.IntegrityError:
+        return redirect('/user-register')
+    finally:
+        return redirect('/')
+
+    
+
+
+
+
+
 
 @app.route('/layouts-blank.html')
 def ayouts_blank():
