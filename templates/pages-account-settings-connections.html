@@ -592,11 +592,12 @@
                       </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
+                      {%for r in slist %}
                       <tr>
-                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> 19UBC101</td>
-                        <td>Alan Mathew</td>
-                        <td><span class="">BCA</span></td>
-                        <td>alanmathew@gmail.in</td>
+                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> {{r[14]}}</td>
+                        <td>{{r[1]}}</td>
+                        <td><span class="">{{r[2]}}</span></td>
+                        <td>{{r[5]}}</td>
                       
                         <td> <div class="col-4 col-sm-5 text-end">
                           <button type="button" class="btn btn-icon btn-outline-danger">
@@ -604,6 +605,7 @@
                           </button>
                         </div></td>
                       </tr>
+                      {%endfor%}
                       
                     </tbody>
                   </table>
@@ -642,11 +644,12 @@
                       </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
+                      {%for r in tlist %}
                       <tr>
-                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> MCKC101</td>
-                        <td>Alan Kuriakose</td>
-                        <td><span class="">BSW</span></td>
-                        <td>alankuriakose@gmail.in</td>
+                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i>  {{r[14]}}</td>
+                        <td> {{r[1]}}</td>
+                        <td><span class=""> {{r[2]}}</span></td>
+                        <td> {{r[5]}}</td>
                       
                         <td> <div class="col-4 col-sm-5 text-end">
                           <button type="button" class="btn btn-icon btn-outline-danger">
@@ -654,6 +657,7 @@
                           </button>
                         </div></td>
                       </tr>
+                      {%endfor%}
                       
                     </tbody>
                   </table>

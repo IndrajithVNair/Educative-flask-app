@@ -176,7 +176,19 @@ def pages_account_settings_accoun():
 
 @app.route('/pages-account-settings-connections.html')
 def pages_account_settings_connections():
-    return render_template('pages-account-settings-connections.html')
+    # fetching details of all students
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM users WHERE Role=2")
+    res=cur.fetchall()
+    mysql.connection.commit()
+
+    # fetching details of faculty
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM users WHERE Role=1")
+    tres=cur.fetchall()
+    mysql.connection.commit()
+
+    return render_template('pages-account-settings-connections.html',slist=res,tlist=tres)
 
 @app.route('/pages-account-settings-notifications.html')
 def pages_account_settings_notifications():
