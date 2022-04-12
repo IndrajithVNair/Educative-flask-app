@@ -178,13 +178,13 @@ def pages_account_settings_accoun():
 def pages_account_settings_connections():
     # fetching details of all students
     cur=mysql.connection.cursor()
-    cur.execute("SELECT * FROM users WHERE Role=2")
+    cur.execute("SELECT * FROM users WHERE Role=2 AND account_status=2")
     res=cur.fetchall()
     mysql.connection.commit()
 
     # fetching details of faculty
     cur=mysql.connection.cursor()
-    cur.execute("SELECT * FROM users WHERE Role=1")
+    cur.execute("SELECT * FROM users WHERE Role=1 AND account_status=2")
     tres=cur.fetchall()
     mysql.connection.commit()
 
