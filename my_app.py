@@ -131,17 +131,20 @@ def user_register():
     role=2
     account_status=0
     cls=1
+    cur=mysql.connection.cursor()
+    cur.execute("INSERT INTO users(Name,Dept,Age,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class,RegisterNum) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,age,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num))
+    mysql.connection.commit()
+    return redirect('/')
 
-
-    try:
-        cur=mysql.connection.cursor()
-        cur.execute("INSERT INTO users(Name,Dept,Age,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,age,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num))
-        mysql.connection.commit()
-        return redirect('/')
-    except mysql.IntegrityError:
-        return redirect('/user-register')
-    finally:
-        return redirect('/')
+    # try:
+    #     cur=mysql.connection.cursor()
+    #     cur.execute("INSERT INTO users(Name,Dept,Age,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,age,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num))
+    #     mysql.connection.commit()
+    #     return redirect('/')
+    # except mysql.IntegrityError:
+    #     return redirect('/user-register')
+    # finally:
+    #     return redirect('/')
 
     
 
@@ -173,6 +176,78 @@ def ayouts_without_navbar():
 @app.route('/pages-account-settings-account.html')
 def pages_account_settings_accoun():
     return render_template('pages-account-settings-account.html')
+
+
+@app.route('/edit-account')
+def editaccount():
+    # fetching the id
+    rid=request.args.get('rid')
+    # fetching details of the account
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM users WHERE Id=%s",rid)
+    res=cur.fetchall()
+    mysql.connection.commit()
+    return render_template('pages-account-settings-edit.html',rlist=res)
+
+@app.route('/update-account',methods=['GET', 'POST'])
+def updateaccount():
+    rid=request.args.get('rid')
+    name=request.form['Name']
+    register_num=request.form['RegisterNumber']
+    email=request.form['email']
+    phone=request.form['phoneNumber']
+    password=request.form['Password']
+    department=request.form['Department']
+    country=request.form['Country']
+    zipcode=request.form['zipCode']
+    state=request.form['state']
+    address=request.form['address']
+    role=request.form['Role']
+    account_status=2
+    cls=1
+    try:
+        cur=mysql.connection.cursor()
+        cur.execute("UPDATE users SET Name=%s,Dept=%s,Password=%s,email=%s,phone=%s,Address=%s,Role=%s,account_status=%s,State=%s,Country=%s,Zipcode=%s,Class=%s WHERE Id=%s",name,department,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num,rid)
+        mysql.connection.commit()
+        return redirect('/pages-account-settings-connections.html')
+    except mysql.IntegrityError:
+        return redirect('/pages-misc-error.html')
+    finally:
+        return redirect('/pages-account-settings-connections.html')
+
+   
+@app.route('/admin-user-register',methods=['GET', 'POST'])
+def admin_user_register():
+    name=request.form['Name']
+    register_num=request.form['RegisterNumber']
+    email=request.form['email']
+    phone=request.form['phoneNumber']
+    password=request.form['password']
+    department=request.form.get('Department')
+    country=request.form.get('Country')
+    zipcode=request.form['zipCode']
+    state=request.form['state']
+    address=request.form['address']
+    role=request.form.get('Role')
+    account_status=2
+    cls=1
+
+    try:
+        cur=mysql.connection.cursor()
+        cur.execute("INSERT INTO users(Name,Dept,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class,RegisterNum) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num))
+        mysql.connection.commit()
+        return redirect('/pages-account-settings-account.html')
+    except mysql.IntegrityError:
+        print(mysql.integrity_error)
+    # finally:
+    #     return redirect('/pages-misc-error.html')
+
+
+@app.route('/pages-account-settings-edit.html')
+def pages_account_settings_edit():
+     return render_template('pages-account-settings-edit.html')
+
+
 
 @app.route('/pages-account-settings-connections.html')
 def pages_account_settings_connections():

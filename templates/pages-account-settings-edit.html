@@ -605,7 +605,7 @@
                     </div>
                     <hr class="my-0" />
                     <div class="card-body">
-                      <form id="formAccountSettings" method="POST" action="http://127.0.0.1:5000/admin-user-register">
+                      <form id="formAccountSettings" method="POST" onsubmit="">
                         <div class="row">
                           <div class="mb-3 col-md-6">
                             <label for="Name" class="form-label">Name</label>
@@ -707,7 +707,7 @@
                           </div>
                           <div class="mb-3 col-md-6">
                             <label for="language" class="form-label">Role</label>
-                            <select id="language" class="select2 form-select">
+                            <select id="language" class="select2 form-select" name="Role">
                               <option value="">Select Users role</option>
                               <option value="Admin">Admin</option>
                               <option value="Teacher">Teacher</option>
@@ -725,9 +725,8 @@
                           </div>
                         </div>
                         <div class="mt-2">
-                         
-                          <button type="submit" class="btn btn-primary me-2">Save</button>
-                      
+                        <!-- <a href="{{url_for('editaccount')}} -->
+                          <button type="submit" class="btn btn-primary me-2">Save</button> </a>
                           <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                         </div>
                       </form>
