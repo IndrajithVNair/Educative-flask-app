@@ -608,19 +608,19 @@
                       <form id="formAccountSettings" method="POST" onsubmit="">
                         <div class="row">
                           <div class="mb-3 col-md-6">
-                            <label for="firstName" class="form-label">First Name</label>
+                            <label for="Name" class="form-label">Name</label>
                             <input
                               class="form-control"
                               type="text"
                               id="firstName"
-                              name="firstName"
+                              name="Name"
                               value="John"
                               autofocus
                             />
                           </div>
                           <div class="mb-3 col-md-6">
-                            <label for="lastName" class="form-label">Last Name</label>
-                            <input class="form-control" type="text" name="lastName" id="lastName" value="Doe" />
+                            <label for="lastName" class="form-label">Register Number</label>
+                            <input class="form-control" type="text" name="RegisterNumber" id="lastName" placeholder="19UBC102" />
                           </div>
                           <div class="mb-3 col-md-6">
                             <label for="email" class="form-label">E-mail</label>
@@ -634,14 +634,14 @@
                             />
                           </div>
                           <div class="mb-3 col-md-6">
-                            <label for="organization" class="form-label">Organization</label>
-                            <input
-                              type="text"
-                              class="form-control"
-                              id="organization"
-                              name="organization"
-                              value="ThemeSelection"
-                            />
+                            <label for="exampleFormControlSelect1" class="form-label">Department</label>
+                            <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example">
+                              <option selected>Select department from the list</option>
+                              <option value="BCA">BCA</option>
+                              <option value="BBA">BBA</option>
+                              <option value="BCOM">BCOM</option>
+                              <option value="BSW">BSW</option>
+                            </select>
                           </div>
                           <div class="mb-3 col-md-6">
                             <label class="form-label" for="phoneNumber">Phone Number</label>

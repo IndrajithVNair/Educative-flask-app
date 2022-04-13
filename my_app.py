@@ -192,7 +192,36 @@ def pages_account_settings_connections():
 
 @app.route('/pages-account-settings-notifications.html')
 def pages_account_settings_notifications():
-    return render_template('pages-account-settings-notifications.html')
+    # fetching details of users in the users table with account_status 1
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM users WHERE account_status=1")
+    res=cur.fetchall()
+    mysql.connection.commit()
+    return render_template('pages-account-settings-notifications.html',rlist=res)
+
+@app.route('/delete-account')
+def deleteaccount():
+    # fetching the id
+    rid=request.args.get('rid')
+    # deleting the account with the corresponding id
+    cur=mysql.connection.cursor()
+    cur.execute("DELETE FROM users WHERE Id=%s",rid)
+    mysql.connection.commit()
+    return(redirect(url_for('pages_saccount_settings_notifications')))
+
+@app.route('/approve-account')
+def approveaccount():
+    # fetching Id
+    rid=request.args.get('rid')
+    cur=mysql.connection.cursor()
+    cur.execute(" UPDATE users SET account_status=2 WHERE Id=%s",rid)
+    mysql.connection.commit()
+    return(redirect(url_for('pages_account_settings_notifications')))
+
+
+
+
+
 
 @app.route('/pages-misc-error.html')
 def pages_misc_error():
