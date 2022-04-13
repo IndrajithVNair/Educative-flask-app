@@ -134,17 +134,10 @@ def user_register():
     cur=mysql.connection.cursor()
     cur.execute("INSERT INTO users(Name,Dept,Age,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class,RegisterNum) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,age,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num))
     mysql.connection.commit()
+    session['User_Created']=True
     return redirect('/')
 
-    # try:
-    #     cur=mysql.connection.cursor()
-    #     cur.execute("INSERT INTO users(Name,Dept,Age,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,age,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num))
-    #     mysql.connection.commit()
-    #     return redirect('/')
-    # except mysql.IntegrityError:
-    #     return redirect('/user-register')
-    # finally:
-    #     return redirect('/')
+   
 
     
 
@@ -229,18 +222,23 @@ def admin_user_register():
     state=request.form['state']
     address=request.form['address']
     role=request.form.get('Role')
+    role_code=0
+
+    if(role=='Admin'):
+        role_code=0
+    elif(role=='Teacher'):
+        role_code=1
+    elif(role=='Student'):
+        role_code=2
+
+
     account_status=2
     cls=1
+    cur=mysql.connection.cursor()
+    cur.execute("INSERT INTO users(Name,Dept,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class,RegisterNum) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,password,email,phone,address,role_code,account_status,state,country,zipcode,cls,register_num))
+    mysql.connection.commit()
 
-    try:
-        cur=mysql.connection.cursor()
-        cur.execute("INSERT INTO users(Name,Dept,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class,RegisterNum) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num))
-        mysql.connection.commit()
-        return redirect('/pages-account-settings-account.html')
-    except mysql.IntegrityError:
-        print(mysql.integrity_error)
-    # finally:
-    #     return redirect('/pages-misc-error.html')
+    return redirect('/pages-account-settings-account.html')
 
 
 @app.route('/pages-account-settings-edit.html')
