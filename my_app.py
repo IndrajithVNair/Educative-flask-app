@@ -84,10 +84,13 @@ def check_user():
             if(user_type==0):
                 #render admin dashboard
                 # set user session as admin session
+                session['user']='admin'
                 return redirect('/admin-dashboard')
             elif(user_type==1):
+                session['user']='teacher'
                 return redirect('/teacher-dashboard')
             elif(user_type==2):
+                session['user']='student'
                 return redirect('/student-dashboard')
     else:
             # when the username or password is not found or when the account is not operational, then
@@ -95,7 +98,7 @@ def check_user():
             session['login']=False
             return redirect('/')
 
-
+    
 
             
 

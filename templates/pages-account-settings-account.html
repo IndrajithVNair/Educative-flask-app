@@ -682,6 +682,7 @@
                               <option value="United States">United States</option>
                             </select>
                           </div>
+                          {% if session['user'] == 'admin'%}
                           <div class="mb-3 col-md-6">
                             <label for="language" class="form-label">Role</label>
                             <select id="language" class="select2 form-select" name="Role">
@@ -692,6 +693,7 @@
                             
                             </select>
                           </div>
+                          {%endif%}
                           <div class="mb-3 col-md-6">
                             <label for="address" class="form-label">Password</label>
                             <input type="text" class="form-control" id="address" name="password" placeholder="password" />
