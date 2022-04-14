@@ -224,7 +224,11 @@ def admin_user_register():
     zipcode=request.form['zipCode']
     state=request.form['state']
     address=request.form['address']
-    role=request.form.get('Role')
+    if(session['user']=='admin'):
+        role=request.form.get('Role')
+    else:
+        role='Student'
+        
     role_code=0
 
     if(role=='Admin'):
