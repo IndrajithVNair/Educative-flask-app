@@ -76,6 +76,8 @@ def check_user():
             user_type=row[8]
             Flag= True
             session['login']=True
+            session['user_id']=row[0]
+            session['username']=row[1]
             break
 
             # using the flag= True check for the user role
@@ -109,6 +111,34 @@ def admin_dashboard():
 @app.route('/teacher-dashboard')
 def teacher_dashboard():
     return render_template('index_teacher.html')
+
+@app.route('/schedule-exam',methods=['GET', 'POST'])
+def exam_schedule():
+    SubjectName=request.form['SubjectName']
+    ExamName=request.form['ExamName']
+    department=request.form['Department']
+    Academicyear=request.form['Academicyear']
+    QuestionPaper=request.form['QuestionPaper']
+    Date=request.form['Date']
+    StartAt=request.form['StartAt']
+    EndAt=request.form['EndAt']
+    Duration=request.form['Duration']
+    mysql.connection.commit()
+    faculty=session.get('username')
+    print(faculty)
+  
+    cur=mysql.connection.cursor()
+    
+    
+    cur.execute("INSERT INTO exams(NAME,SUB,Dept,Academicyear,Date,STARTS_AT,ENDS_AT,Duration,ScheduledBy) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ",(ExamName,SubjectName,department,Academicyear,Date,StartAt,EndAt,Duration,faculty))
+    mysql.connection.commit()
+    return render_template('/forms-basic-inputs.html',res=True)
+    
+
+@app.route('/manage-exams.html')
+def manage_exams():
+    return render_template('manage-exams.html')
+
 
 @app.route('/student-dashboard')
 def student_dashboard():
