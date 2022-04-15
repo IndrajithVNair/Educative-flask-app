@@ -5,6 +5,7 @@ import docx
 import qbgen as qb
 import os
 from plagarismCheck import *
+from copyCat import *
 app = Flask(__name__)
 
 # Enter your database connection details below
@@ -189,6 +190,18 @@ def checkplgweb():
         data=''.join(alltext)
         copied=checkpg(data,srcurl)
         return(render_template('plagarismResult.html',c=copied))
+
+@app.route('/check-copycat')
+def check_copycat():
+    return render_template('check-copycat.html')
+
+@app.route('/checkcpycat',methods=['GET','POST'])
+def updateres():
+        if(request.method=='POST'):
+            srcfile=request.files['src']
+            ansfile=request.files['ans']
+            per,matchlist=plgcheck(srcfile,ansfile)
+            return(render_template('copycatResult.html',per=per,m=matchlist))
 
 
 @app.route('/qbresult')
