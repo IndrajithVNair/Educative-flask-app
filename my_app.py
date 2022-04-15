@@ -1,7 +1,9 @@
 from distutils.log import debug
-from flask import Flask, render_template,request,redirect,session,Response,url_for,flash
+from flask import Flask, render_template,request,redirect,session,Response,url_for,flash,send_file
 from flask_mysqldb import MySQL
-
+import docx
+import qbgen as qb
+import os
 app = Flask(__name__)
 
 # Enter your database connection details below
@@ -9,6 +11,7 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'educative'
+app.config["UPLOAD_FOLDER"] = "static" #folder to upload
 
 # Intialize MySQL
 mysql = MySQL(app)
@@ -154,8 +157,40 @@ def deleteexam():
     session['exam_deleted']=True
     return redirect('/manage-exams.html')
 
+_FILE2 = ""
+@app.route('/create-question-paper.html', methods=['GET', 'POST'])
+def createquestionpaper():
+    qb.deleteStaticFiles()
+    if request.method == 'POST':
+        upload_questionbank = request.files['qb_file']
+        if upload_questionbank.filename != '':
+            filepath = os.path.join(app.config["UPLOAD_FOLDER"],upload_questionbank.filename)
+            upload_questionbank.save(filepath)
+            fpath = filepath.split("'\'")
+            qb.acceptPath(fpath[0])
+            return render_template("qbresult.html")
+    return render_template('create-question-paper.html')
+
+# @app.route('/qbresult', methods=['GET','POST'])
+# def qbresult():
+#     qb.deleteStaticFiles()
+#     if request.method == 'POST':
+#         upload_questionbank = request.files['qb_file']
+#         if upload_questionbank.filename != '':
+#             filepath = os.path.join(app.config["UPLOAD_FOLDER"],upload_questionbank.filename)
+#             upload_questionbank.save(filepath)
+#             fpath = filepath.split("'\'")
+#             qb.acceptPath(fpath[0])
+#             return render_template("qbresult.html")
+#     session['fileuploaderror'] = True
+#     return redirect('/create-question-paper.html')
 
 
+
+@app.route('/qbresult')
+def download_qb_file():
+    p = r'C:\Users\acer\Downloads\flask\my_app\static\demo.docx'
+    return send_file(p,as_attachment=True)
 
 @app.route('/student-dashboard')
 def student_dashboard():
