@@ -27,7 +27,7 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
 
-    <title>Account settings - Account | Sneat - Bootstrap 5 HTML Admin Template - Pro</title>
+    <title>Account settings - Pages | Sneat - Bootstrap 5 HTML Admin Template - Pro</title>
 
     <meta name="description" content="" />
 
@@ -67,9 +67,9 @@
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
-       <!-- Menu -->
+      <!-- Menu -->
 
-       <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
         <div class="app-brand demo">
           <a href="index.html" class="app-brand-link">
             <span class="app-brand-logo demo">
@@ -370,6 +370,11 @@
                 </a>
               </li>
               <li class="menu-item">
+                <a href="manage-exams.html" class="menu-link">
+                  <div data-i18n="Basic Inputs">Manage Scheduled exams</div>
+                </a>
+              </li>
+              <li class="menu-item">
                 <a href="forms-input-groups.html" class="menu-link">
                   <div data-i18n="Input groups">Check proctoring mode</div>
                 </a>
@@ -550,177 +555,71 @@
             <!-- Content -->
 
             <div class="container-xxl flex-grow-1 container-p-y">
-              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Account Settings /</span> Add Accounts</h4>
-
-              <div class="row">
-                <div class="col-md-12">
-                  <ul class="nav nav-pills flex-column flex-md-row mb-3">
-                    <li class="nav-item">
-                      <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-user me-1"></i> Account</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="pages-account-settings-notifications.html"
-                        ><i class="bx bx-bell me-1"></i>Verification</a
-                      >
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="pages-account-settings-connections.html"
-                        ><i class="bx bx-link-alt me-1"></i> Manage Users</a
-                      >
-                    </li>
-                  </ul>
-                  <div class="card mb-4">
-                    <h5 class="card-header"></h5>
-                    <!-- Account -->
-                    <div class="card-body">
-                      {% if session['User_Created'] %}
-                      <div class="alert alert-primary alert-dismissible" role="alert">
-                      The user successfuly added to database
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                      </div>
-                      {% endif %}
-                    </div>
-                    <hr class="my-0" />
-                    <div class="card-body">
-                      <form id="formAccountSettings" method="POST" action="http://127.0.0.1:5000/admin-user-register">
-                        <div class="row">
-                          <div class="mb-3 col-md-6">
-                            <label for="Name" class="form-label">Name</label>
-                            <input
-                              class="form-control"
-                              type="text"
-                              id="firstName"
-                              name="Name"
-                              value="John"
-                              autofocus
-                            />
-                          </div>
-                          <div class="mb-3 col-md-6">
-                            <label for="lastName" class="form-label">Register Number</label>
-                            <input class="form-control" type="text" name="RegisterNumber" id="lastName" placeholder="19UBC102" />
-                          </div>
-                          <div class="mb-3 col-md-6">
-                            <label for="email" class="form-label">E-mail</label>
-                            <input
-                              class="form-control"
-                              type="text"
-                              id="email"
-                              name="email"
-                              value="john.doe@example.com"
-                              placeholder="john.doe@example.com"
-                            />
-                          </div>
-                          <div class="mb-3 col-md-6">
-                            <label for="exampleFormControlSelect1" class="form-label">Department</label>
-                            <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" name="Department">
-                              <option selected>Select department from the list</option>
-                              <option value="BCA">BCA</option>
-                              <option value="BBA">BBA</option>
-                              <option value="BCOM">BCOM</option>
-                              <option value="BSW">BSW</option>
-                            </select>
-                          </div>
-                          <div class="mb-3 col-md-6">
-                            <label class="form-label" for="phoneNumber">Phone Number</label>
-                            <div class="input-group input-group-merge">
-                              <span class="input-group-text">IN (+91)</span>
-                              <input
-                                type="text"
-                                id="phoneNumber"
-                                name="phoneNumber"
-                                class="form-control"
-                                placeholder="202 555 0111"
-                              />
+              <h4 class="fw-bold py-3 mb-4">
+                <span class="text-muted fw-light">Exams / </span> Manage Exams
+              </h4>
+ <!-- Basic Bootstrap Table -->
+ <div class="card">
+  <h5 class="card-header">Online Exams</h5>
+  {%if session[exam_deleted]%}
+  <div class="alert alert-primary alert-dismissible" role="alert">
+    The exam succesfuly deleted
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {%endif%}
+  <div class="table-responsive text-nowrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Name</th>
+          <th>Date</th>
+          <th>Starts at</th>
+          <th>Ends at</th>
+          <th>Duration</th>
+          <th>Scheduled by</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody class="table-border-bottom-0">
+        {%for r in elist %}
+                      <tr>
+                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> {{r[1]}}</td>
+                        <td>{{r[2]}}</td>
+                        <td><span class="">{{r[5]}}</span></td>
+                        <td>{{r[6]}}</td>
+                        <td>{{r[7]}}</td>
+                        <td>{{r[8]}}</td>
+                        <td>{{r[9]}}</td>
+                      
+                        <td> <div class="col-4 col-sm-5 text-end">
+                          
+                          <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                              <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                              <a class="dropdown-item"
+                                >
+                                <i class="bx bx-edit-alt me-1"></i> Edit</a
+                              >
+                              <a class="dropdown-item" href="{{url_for('deleteexam',EID=r[0])}}" 
+                                ><i class="bx bx-trash me-1"></i> Delete</a
+                              >
                             </div>
                           </div>
-                          <div class="mb-3 col-md-6">
-                            <label for="address" class="form-label">Address</label>
-                            <input type="text" class="form-control" id="address" name="address" placeholder="Address" />
-                          </div>
-                          <div class="mb-3 col-md-6">
-                            <label for="state" class="form-label">State</label>
-                            <input class="form-control" type="text" id="state" name="state" placeholder="California" />
-                          </div>
-                          <div class="mb-3 col-md-6">
-                            <label for="zipCode" class="form-label">Zip Code</label>
-                            <input
-                              type="text"
-                              class="form-control"
-                              id="zipCode"
-                              name="zipCode"
-                              placeholder="231465"
-                              maxlength="6"
-                            />
-                          </div>
-                          <div class="mb-3 col-md-6">
-                            <label class="form-label" for="country">Country</label>
-                            <select id="country" class="select2 form-select" name="Country">
-                              <option value="">Select</option>
-                              <option value="Australia">Australia</option>
-                              <option value="Bangladesh">Bangladesh</option>
-                              <option value="Belarus">Belarus</option>
-                              <option value="Brazil">Brazil</option>
-                              <option value="Canada">Canada</option>
-                              <option value="China">China</option>
-                              <option value="France">France</option>
-                              <option value="Germany">Germany</option>
-                              <option value="India">India</option>
-                              <option value="Indonesia">Indonesia</option>
-                              <option value="Israel">Israel</option>
-                              <option value="Italy">Italy</option>
-                              <option value="Japan">Japan</option>
-                              <option value="Korea">Korea, Republic of</option>
-                              <option value="Mexico">Mexico</option>
-                              <option value="Philippines">Philippines</option>
-                              <option value="Russia">Russian Federation</option>
-                              <option value="South Africa">South Africa</option>
-                              <option value="Thailand">Thailand</option>
-                              <option value="Turkey">Turkey</option>
-                              <option value="Ukraine">Ukraine</option>
-                              <option value="United Arab Emirates">United Arab Emirates</option>
-                              <option value="United Kingdom">United Kingdom</option>
-                              <option value="United States">United States</option>
-                            </select>
-                          </div>
-                          {% if session['user'] == 'admin'%}
-                          <div class="mb-3 col-md-6">
-                            <label for="language" class="form-label">Role</label>
-                            <select id="language" class="select2 form-select" name="Role">
-                              <option value="">Select Users role</option>
-                              <option value="Admin">Admin</option>
-                              <option value="Teacher">Teacher</option>
-                              <option value="Student">Student</option>
-                            
-                            </select>
-                          </div>
-                          {%endif%}
-                          <div class="mb-3 col-md-6">
-                            <label for="address" class="form-label">Password</label>
-                            <input type="text" class="form-control" id="address" name="password" placeholder="password" />
-                          </div>
-                          <div class="mb-3 col-md-6">
-                            <label for="address" class="form-label">Confirm password</label>
-                            <input type="text" class="form-control" id="address" name="confirm password" placeholder="confirm password" />
-                          </div>
-                        </div>
-                        <div class="mt-2">
-                         
-                          <button type="submit" class="btn btn-primary me-2">Save</button>
-                      
-                          <button type="reset" class="btn btn-outline-secondary">Cancel</button>
-                        </div>
-                      </form>
-                    </div>
-                    <!-- /Account -->
-                  </div>
-                
-                </div>
-              </div>
+                      </td>
+                      </tr>
+                      {%endfor%}
+      </tbody>
+    </table>
+  </div>
+</div>
+<!--/ Basic Bootstrap Table -->
             </div>
             <!-- / Content -->
 
-          
-
+           
             <div class="content-backdrop fade"></div>
           </div>
           <!-- Content wrapper -->
@@ -733,7 +632,7 @@
     </div>
     <!-- / Layout wrapper -->
 
-  
+   
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
@@ -751,7 +650,6 @@
     <script src="../static/js/000070main.js"></script>
 
     <!-- Page JS -->
-    <script src="../static/js/000071pages-account-settings-account.js"></script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>

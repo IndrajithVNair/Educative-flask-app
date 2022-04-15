@@ -137,7 +137,24 @@ def exam_schedule():
 
 @app.route('/manage-exams.html')
 def manage_exams():
-    return render_template('manage-exams.html')
+    
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM exams where Status=0")
+    res=cur.fetchall()
+    mysql.connection.commit()
+    
+    return render_template('manage-exams.html',elist=res)
+
+@app.route('/delete-exams')
+def deleteexam():
+    EID=request.args.get('EID')
+    cur=mysql.connection.cursor()
+    cur.execute("DELETE FROM exams where EID=%s",EID)
+    mysql.connection.commit()
+    session['exam_deleted']=True
+    return redirect('/manage-exams.html')
+
+
 
 
 @app.route('/student-dashboard')
