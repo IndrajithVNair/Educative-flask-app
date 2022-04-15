@@ -4,6 +4,7 @@ from flask_mysqldb import MySQL
 import docx
 import qbgen as qb
 import os
+from plagarismCheck import *
 app = Flask(__name__)
 
 # Enter your database connection details below
@@ -171,20 +172,23 @@ def createquestionpaper():
             return render_template("qbresult.html")
     return render_template('create-question-paper.html')
 
-# @app.route('/qbresult', methods=['GET','POST'])
-# def qbresult():
-#     qb.deleteStaticFiles()
-#     if request.method == 'POST':
-#         upload_questionbank = request.files['qb_file']
-#         if upload_questionbank.filename != '':
-#             filepath = os.path.join(app.config["UPLOAD_FOLDER"],upload_questionbank.filename)
-#             upload_questionbank.save(filepath)
-#             fpath = filepath.split("'\'")
-#             qb.acceptPath(fpath[0])
-#             return render_template("qbresult.html")
-#     session['fileuploaderror'] = True
-#     return redirect('/create-question-paper.html')
+@app.route('/check-assignments')
+def checkassignments():
+    return render_template('check-assignments.html')
 
+@app.route('/plagarism',methods=['GET', 'POST'])
+def checkplgweb():
+    if(request.method=='POST'):
+        srcurl=request.form['url1']
+        ansfile=request.files['src1']
+        alltext=[]
+        data=""
+        doc=docx.Document(ansfile)
+        for docpar in doc.paragraphs:
+            alltext.append(docpar.text)
+        data=''.join(alltext)
+        copied=checkpg(data,srcurl)
+        return(render_template('plagarismResult.html',c=copied))
 
 
 @app.route('/qbresult')
