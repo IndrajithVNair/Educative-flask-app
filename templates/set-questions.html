@@ -555,7 +555,7 @@
             <!-- Content -->
 
             <div class="container-xxl flex-grow-1 container-p-y">
-              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Exams /</span> Schedule Exams</h4>
+              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Exams /</span> set questions</h4>
               <div class="card mb-4">
                 <div class="card-body">
                   {%if res%}
@@ -564,69 +564,19 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
                   {%endif%}
-                  <form id="formScheduleExam" method="POST" action="http://127.0.0.1:5000/schedule-exam">
+                  <form id="formScheduleExam" method="POST" action="http://127.0.0.1:5000/set-exam-questions">
                     <div class="row">
+                        <input class="form-control" type="hidden" value="{{questions}}" id="html5-number-input" name="numberofquestions"/>
+                    {% for i in range(1,questions+1)%}
                       <div class="mb-3 col-md-6">
-                        <label for="Name" class="form-label">Subject name</label>
-                        <input
-                          class="form-control"
-                          type="text"
-                          id="firstName"
-                          name="SubjectName"
-                          value="Operation Systems"
-                          autofocus
-                        />
+                        <label for="Name" class="form-label">Enter question{{i}}</label>
+                        <div>
+                            
+                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="question{{i}}"></textarea>
+                          </div>
                       </div>
-                      <div class="mb-3 col-md-6">
-                        <label for="lastName" class="form-label">Exam Name</label>
-                        <input class="form-control" type="text" name="ExamName" id="lastName" placeholder="19UBC102" />
-                      </div>
-                     
-                      <div class="mb-3 col-md-6">
-                        <label for="exampleFormControlSelect1" class="form-label">Department</label>
-                        <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" name="Department">
-                          <option selected>Select department from the list</option>
-                          <option value="BCA">BCA</option>
-                          <option value="BBA">BBA</option>
-                          <option value="BCOM">BCOM</option>
-                          <option value="BSW">BSW</option>
-                        </select>
-                      </div>
-                      <div class="mb-3 col-md-6">
-                        <label for="exampleFormControlSelect1" class="form-label">Academic Year</label>
-                        <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" name="Academicyear">
-                          <option selected>Select academic year from the list</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                         
-                        </select>
-                      </div>
-                      <div class="mb-3">
-                        <label for="formFile" class="form-label">Upload Questions</label>
-                        <input class="form-control" type="file" id="formFile" name="QuestionPaper" />
-                      </div>
-                      <div class="mb-3 col-md-6">
-                        <label for="address" class="form-label">Date</label>
-                        <input class="form-control" type="date" value="2021-06-18" id="html5-date-input" name="Date"/>
-                      </div>
-                      <div class="mb-3 col-md-6">
-                        <label for="state" class="form-label">Start Time</label>
-                        <input class="form-control" type="time" value="12:30:00" id="html5-time-input" name="StartAt"/>
-                      </div>
-                      <div class="mb-3 col-md-6">
-                        <label for="state" class="form-label">End Time</label>
-                        <input class="form-control" type="time" value="12:30:00" id="html5-time-input" name="EndAt"/>
-                      </div>
-                      <div class="mb-3 col-md-6">
-                        <label for="zipCode" class="form-label">Duration (Minutes)</label>
-                        <input class="form-control" type="number" value="30" id="html5-number-input" name="Duration"/>
-                      </div>
-                      <div class="mb-3 col-md-6">
-                        <label for="zipCode" class="form-label">Number of Questions</label>
-                        <input class="form-control" type="number" value="4" id="html5-number-input" name="questions"/>
-                      </div>
-                    
+                    {%endfor%}
+                      
                     <div class="mt-2">
                      
                       <button type="submit" class="btn btn-primary me-2">Next</button>

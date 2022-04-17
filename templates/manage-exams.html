@@ -561,12 +561,19 @@
  <!-- Basic Bootstrap Table -->
  <div class="card">
   <h5 class="card-header">Online Exams</h5>
-  {%if session[exam_deleted]%}
+  {%if session['exam_deleted']%}
   <div class="alert alert-primary alert-dismissible" role="alert">
     The exam succesfuly deleted
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
   {%endif%}
+
+  {%if session['ExamAdded']%}
+                  <div class="alert alert-primary alert-dismissible" role="alert">
+                    Questions added successfully!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                  {%endif%}
   <div class="table-responsive text-nowrap">
     <table class="table">
       <thead>

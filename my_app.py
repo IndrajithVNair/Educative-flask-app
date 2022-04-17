@@ -6,8 +6,12 @@ import qbgen as qb
 import os
 from plagarismCheck import *
 from copyCat import *
-app = Flask(__name__)
+from datetime import date
 
+today = date.today()
+app = Flask(__name__)
+global examdata
+examdata ={}
 # Enter your database connection details below
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -130,14 +134,60 @@ def exam_schedule():
     Duration=request.form['Duration']
     mysql.connection.commit()
     faculty=session.get('username')
+    number_of_questions=request.form['questions']
     print(faculty)
-  
+    global examdata
+
+    examdata['Subject']=SubjectName
+    examdata['Exam']=ExamName
+    examdata['Department']=department
+    examdata['Academicyear']=Academicyear
+    examdata['Date']=Date
+    examdata['StartAt']=StartAt
+    examdata['faculty']=faculty
+
     cur=mysql.connection.cursor()
-    
-    
     cur.execute("INSERT INTO exams(NAME,SUB,Dept,Academicyear,Date,STARTS_AT,ENDS_AT,Duration,ScheduledBy) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ",(ExamName,SubjectName,department,Academicyear,Date,StartAt,EndAt,Duration,faculty))
     mysql.connection.commit()
-    return render_template('/forms-basic-inputs.html',res=True)
+    return render_template('/set-questions.html',res=True,questions=4)
+    
+@app.route('/set-exam-questions',methods=['GET', 'POST'])
+def setquestions():
+    number_of_questions = request.form['numberofquestions']
+    number_of_questions = int(number_of_questions)
+    questions = []
+   
+    for i in range(1,number_of_questions+1):
+        num=str(i)
+        questions.append(request.form['question'+num])
+   
+   # find the exam id of the question for which the question text is being encountered
+    SubjectName=examdata['Subject']
+    ExamName=examdata['Exam']
+    department=examdata['Department']
+    Academicyear=examdata['Academicyear']
+    Date=examdata['Date']
+    StartAt=examdata['StartAt']
+    faculty=examdata['faculty']
+
+    cur=mysql.connection.cursor()
+    #print("SELECT EID FROM exams WHERE NAME={} AND SUB={} AND Dept={} AND Academicyear={} AND Date={} AND STARTS_AT={} AND ScheduledBy={}".format(ExamName,SubjectName,department,Academicyear,Date,StartAt,faculty))
+    cur.execute("SELECT EID FROM exams WHERE NAME=%s AND SUB=%s AND Dept=%s AND Academicyear=%s AND Date=%s AND STARTS_AT=%s AND ScheduledBy=%s",(ExamName,SubjectName,department,Academicyear,Date,StartAt,faculty))
+    res=cur.fetchall()
+    mysql.connection.commit()
+    EID=res[0][0]
+    print("EID: ",EID)
+
+    # insert the questions into exam_data table
+    question_number=1
+    for i in questions:
+        cur=mysql.connection.cursor()
+        cur.execute("INSERT INTO exam_data (EID,Question_Number,Question_Text) VALUES (%s,%s,%s)",(EID,question_number,i))
+        mysql.connection.commit()
+        question_number+=1
+        session['ExamAdded']=True
+    return redirect('/manage-exams.html')
+
     
 
 @app.route('/manage-exams.html')
@@ -148,13 +198,36 @@ def manage_exams():
     res=cur.fetchall()
     mysql.connection.commit()
     
-    return render_template('manage-exams.html',elist=res)
+    return render_template('manage-exams.html',elist=res,ExamAdded=False)
+@app.route('/attend-exams')
+def attend_exams():
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM exams where Status=0")
+    res=cur.fetchall()
+    mysql.connection.commit()
+    
+    return render_template('attend-exams.html',elist=res)
+@app.route('/attendexam')
+def attendexam():
+    # EID= request.args.get('EID')
+    # cur=mysql.connection.cursor()
+    # cur.execute("SELECT * FROM exams where EID={} and Status=0".format(EID))
+    # res=cur.fetchall()
+    # check whether the current date and time is within the scheduled time span for the exam 
+    # d1 = today.strftime("%Y/%m/%d")
+    # print(res)
+    return render_template('pages-misc-under-maintenance.html')
+    
+    
+
+
+
 
 @app.route('/delete-exams')
 def deleteexam():
     EID=request.args.get('EID')
     cur=mysql.connection.cursor()
-    cur.execute("DELETE FROM exams where EID=%s",EID)
+    cur.execute("DELETE FROM exams where EID={}".format(EID))
     mysql.connection.commit()
     session['exam_deleted']=True
     return redirect('/manage-exams.html')
@@ -211,7 +284,15 @@ def download_qb_file():
 
 @app.route('/student-dashboard')
 def student_dashboard():
-    return render_template('index_student.html')
+    user_id=session['user_id']
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM users where Id={}".format(str(user_id)))
+    res=cur.fetchall()
+    Dept= res[0][2]
+    Dept= str(Dept)
+    cur.execute("SELECT Name FROM sub WHERE CLASS='{}' and C_CODE={}".format(Dept,str(res[0][13])))
+    course=cur.fetchall()
+    return render_template('index_student.html',row=res,course=course,res=True)
 
 @app.route('/')
 def index():
