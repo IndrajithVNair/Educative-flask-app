@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from distutils.log import debug
 from flask import Flask, render_template,request,redirect,session,Response,url_for,flash,send_file
 from flask_mysqldb import MySQL
@@ -514,13 +515,18 @@ def updateaccount():
         return redirect('/pages-misc-error.html')
     finally:
         return redirect('/pages-account-settings-connections.html')
+
+
+
 @app.route('/add-new-course',methods=['GET','POST'])
 def add_new_course():
+    #updation of the already existing courses are also performed with this function
     CourseName= request.form['CourseName']
     CourseCode = request.form['CourseCode']
     department=request.form.get('Department')
     Academicyear = request.form.get('Academicyear')
     facultyid = request.form['facultyid']
+    facultyid='MCK'+facultyid
 
     print("Course details:",CourseName, CourseCode,department,Academicyear,facultyid)
     cur=mysql.connection.cursor()
@@ -528,7 +534,42 @@ def add_new_course():
     mysql.connection.commit()
     session['course_added']=True
     return redirect('/pages-add-courses.html')
+
+
+@app.route('/pages-view-courses.html')
+def view_courses():
+
+    # two results should be fetched one for admin listing all the courses
+    # and one for faculty to edit their own courses
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM courses")
+    admin_res=cur.fetchall()
+    mysql.connection.commit()
+    return render_template('view-courses.html',admin_res=admin_res)
    
+@app.route('/delete-course')
+def deletecourse():
+    course_code=request.args.get('course_code')
+    cur=mysql.connection.cursor()
+    cur.execute("DELETE FROM courses where CourseCode={}".format(course_code))
+    mysql.connection.commit()
+    session['course_deleted']=True
+    return redirect('/pages-view-courses.html')
+
+@app.route('/edit-course')
+def editcourse():
+    course_code=request.args.get('course_code')
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM courses WHERE CourseCode='{}'".format(course_code))
+    res=cur.fetchall()
+    mysql.connection.commit()
+    session['editcourse']=True
+    session['course_code']=course_code
+    return redirect('/add-new-course')
+
+
+
+
 @app.route('/admin-user-register',methods=['GET', 'POST'])
 def admin_user_register():
     name=request.form['Name']
@@ -586,6 +627,8 @@ def pages_account_settings_connections():
     mysql.connection.commit()
 
     return render_template('pages-account-settings-connections.html',slist=res,tlist=tres)
+
+
 
 @app.route('/pages-account-settings-notifications.html')
 def pages_account_settings_notifications():

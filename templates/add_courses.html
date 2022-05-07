@@ -167,13 +167,13 @@
                     <li class="menu-header small text-uppercase"><span class="menu-header-text">Courses</span></li>
                     <!-- Cards -->
                     <li class="menu-item">
-                        <a href="cards-basic.html" class="menu-link">
+                        <a href="pages-view-courses.html" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-collection"></i>
                             <div data-i18n="Basic">View all</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="cards-basic.html" class="menu-link">
+                        <a href="pages-add-courses.html" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-collection"></i>
                             <div data-i18n="Basic">Add Course</div>
                         </a>
@@ -352,13 +352,14 @@
                     <h5 class="card-header"> Add course details</h5>
                     <!-- Account -->
                     <div class="card-body">
-                      {% if session['course_added'] %}
+                     
+                      {%if session['course_added']%}
                       <div class="alert alert-primary alert-dismissible" role="alert">
-                      Course successfully added to database
+                        The course succesfuly added
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                       </div>
-                      {{ session.pop('course_added',Null) }}
-                      {% endif %}
+                     {{ session.pop('course_added',NULL)}}
+                      {%endif%}
                     </div>
                     <hr class="my-0" />
                     <div class="card-body">
