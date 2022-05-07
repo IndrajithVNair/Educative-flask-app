@@ -443,7 +443,9 @@ def user_register():
     return redirect('/')
 
    
-
+@app.route('/pages-add-courses.html',methods=['GET', 'POST'])
+def add_courses():
+    return render_template('add_courses.html')
     
 
 
@@ -512,7 +514,20 @@ def updateaccount():
         return redirect('/pages-misc-error.html')
     finally:
         return redirect('/pages-account-settings-connections.html')
+@app.route('/add-new-course',methods=['GET','POST'])
+def add_new_course():
+    CourseName= request.form['CourseName']
+    CourseCode = request.form['CourseCode']
+    department=request.form.get('Department')
+    Academicyear = request.form.get('Academicyear')
+    facultyid = request.form['facultyid']
 
+    print("Course details:",CourseName, CourseCode,department,Academicyear,facultyid)
+    cur=mysql.connection.cursor()
+    cur.execute("INSERT INTO courses(CourseCode,Name,Faculty_ID,Department,Academicyear) VALUES(%s,%s,%s,%s,%s)",(CourseCode,CourseName,facultyid,department,Academicyear))
+    mysql.connection.commit()
+    session['course_added']=True
+    return redirect('/pages-add-courses.html')
    
 @app.route('/admin-user-register',methods=['GET', 'POST'])
 def admin_user_register():
