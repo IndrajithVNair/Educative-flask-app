@@ -7,10 +7,15 @@ import os
 from plagarismCheck import *
 from copyCat import *
 from datetime import date
-
+import time
+import threading
+import cv2
+import face_recognition as fr
+from playsound import playsound
 today = date.today()
 app = Flask(__name__)
 global examdata
+global user_id
 examdata ={}
 # Enter your database connection details below
 app.config['MYSQL_HOST'] = 'localhost'
@@ -21,6 +26,56 @@ app.config["UPLOAD_FOLDER"] = "static" #folder to upload
 
 # Intialize MySQL
 mysql = MySQL(app)
+def checkstudent():
+    
+    break_outer=False
+    ismoved=False
+    frame2=None
+    #global location_changed
+    location_changed=0
+    global examrunning            
+    if(examrunning==False):
+        break_outer=True
+    while(True):
+        filepath=r'C:\Users\acer\Downloads\flask\my_app\static\studentimages'#path where captured image is stored
+        currentdir=os.getcwd()
+        os.chdir(filepath)
+        filename=session['register_num']+".JPG"
+        storedfilename="stored"+session['register_num']+".JPG"
+        imgpath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename)
+        os.chdir(currentdir)
+        camera = cv2.VideoCapture(0)
+        return_value, image = camera.read()#capturimg photo from webcam using opencv
+        del(camera)
+        filepath=r'C:\Users\acer\Downloads\flask\my_app\static\studentimages'#path where image has to be stored
+        currentdir=os.getcwd()
+        os.chdir(filepath)
+        filename=session['sid']+".JPG"
+        imgpath=os.path.join("studentimages/",filename)
+        cv2.imwrite(filename, image)
+        os.chdir(currentdir)
+        capturedphoto=fr.load_image_file(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages\19UBC129.JPG")#capturedphoto
+        storedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\images",storedfilename)
+        storedphoto=fr.load_image_file(storedphotopath)                             
+        encoding1=fr.face_encodings(storedphoto)[0]
+        encoding2=fr.face_encodings(capturedphoto)[0]
+        res=fr.compare_faces([encoding1],encoding2)
+        if(res[0]==True):
+            cur=mysql.connection.cursor()
+            cur.execute("SELECT * FROM COURSE")
+            mysql.connection.commit
+            courses=cur.fetchall()
+            return redirect('pages-misc-error.html',message="face recognition data mismatch")
+        else:
+           pass
+
+   
+
+           
+       
+        
+
+bgthread=threading.Thread(target=checkstudent)
 
 @app.route('/auth-forgot-password-basic.html')
 def auth_forgot_password_basic():
@@ -86,6 +141,8 @@ def check_user():
             Flag= True
             session['login']=True
             session['user_id']=row[0]
+            session['register_num']=row[14]
+            user_id=row[0]
             session['username']=row[1]
             break
 
@@ -135,6 +192,7 @@ def exam_schedule():
     mysql.connection.commit()
     faculty=session.get('username')
     number_of_questions=request.form['questions']
+    number_of_questions=int(number_of_questions)
     print(faculty)
     global examdata
 
@@ -149,7 +207,7 @@ def exam_schedule():
     cur=mysql.connection.cursor()
     cur.execute("INSERT INTO exams(NAME,SUB,Dept,Academicyear,Date,STARTS_AT,ENDS_AT,Duration,ScheduledBy) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ",(ExamName,SubjectName,department,Academicyear,Date,StartAt,EndAt,Duration,faculty))
     mysql.connection.commit()
-    return render_template('/set-questions.html',res=True,questions=4)
+    return render_template('/set-questions.html',res=True,questions=number_of_questions)
     
 @app.route('/set-exam-questions',methods=['GET', 'POST'])
 def setquestions():
@@ -176,7 +234,7 @@ def setquestions():
     res=cur.fetchall()
     mysql.connection.commit()
     EID=res[0][0]
-    print("EID: ",EID)
+    
 
     # insert the questions into exam_data table
     question_number=1
@@ -205,17 +263,81 @@ def attend_exams():
     cur.execute("SELECT * FROM exams where Status=0")
     res=cur.fetchall()
     mysql.connection.commit()
-    
-    return render_template('attend-exams.html',elist=res)
+    #print(res[0][5])
+    # display only those exams which are set to be attended today
+    d1 = today.strftime("%Y-%m-%d")
+    elist=()
+    for i in range(len(res)):
+        date=res[i][5]
+        date=str(date)
+        if(date==d1):
+            temp=(res[i],)
+            elist=elist+temp
+       
+    #print(elist)
+    return render_template('attend-exams.html',elist=elist)
+
+
+
 @app.route('/attendexam')
 def attendexam():
-    # EID= request.args.get('EID')
-    # cur=mysql.connection.cursor()
-    # cur.execute("SELECT * FROM exams where EID={} and Status=0".format(EID))
-    # res=cur.fetchall()
-    # check whether the current date and time is within the scheduled time span for the exam 
-    # d1 = today.strftime("%Y/%m/%d")
-    # print(res)
+    EID= request.args.get('EID')
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM exams where EID=%s and Status=0",(EID,))
+    res=cur.fetchall()
+    global attended
+    #check whether the current date and time is within the scheduled time span for the exam 
+    t= time.localtime()
+    current_time = time.strftime("%H:%M", t)
+    STARTS_AT=res[0][6]
+    STARTS_AT =str(STARTS_AT)
+    ENDS_AT=res[0][7]
+    ENDS_AT =str(ENDS_AT)
+    if(current_time> STARTS_AT and current_time<ENDS_AT ):
+        # render template for attending the exams
+        
+        # check if the user has already attended the exam from the attended_list
+        cur=mysql.connection.cursor()
+        user_id=''
+        user_id=session['user_id']
+        cur.execute("SELECT * FROM attended_list where EID=%s and user_id=%s",(EID,user_id,))
+        res=cur.fetchall()
+        mysql.connection.commit()
+
+        if len(res)==0:
+            # this means that the user hasent attempted the exam yet 
+            # record the attempt in the attended_list table
+            
+            cur.execute("INSERT INTO attended_list (EID,user_id,Attended) VALUES(%s,%s,%s)",(EID,user_id,1))
+            mysql.connection.commit()
+            # fetch the questions for the exam
+            cur.execute("SELECT Question_Text FROM exam_data WHERE EID=%s",(EID,))
+            res=cur.fetchall()
+            res=cur.execute("SELECT Question_Number FROM exam_data WHERE EID=%s",(EID,))
+            number_of_questions=res
+            print("number of questions:",number_of_questions)
+            global examrunning
+            examrunning=True
+            bgthread.start()
+            return render_template('attend-exam-submit-answers.html',qlist=res,questions=number_of_questions)
+        else:
+            # this means that the user has already attempted the exam
+            message="You have already attempted the exam"
+            return render_template('pages-misc-error.html',message=message)
+    else:
+        # this means that the user has tried to attempt the exam after the allocated time
+        message="The time allocated for the exam has elapsed"
+        return render_template('pages-misc-error.html',message=message)
+    
+
+
+
+        # update the attended column in the exam table
+        # after the time set the exam as unavailable
+        # add the users name to the attended_list table
+        
+
+
     return render_template('pages-misc-under-maintenance.html')
     
     
