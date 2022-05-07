@@ -551,7 +551,7 @@ def view_courses():
 def deletecourse():
     course_code=request.args.get('course_code')
     cur=mysql.connection.cursor()
-    cur.execute("DELETE FROM courses where CourseCode={}".format(course_code))
+    cur.execute("DELETE FROM courses where CourseCode='{}'".format(course_code))
     mysql.connection.commit()
     session['course_deleted']=True
     return redirect('/pages-view-courses.html')
@@ -565,7 +565,27 @@ def editcourse():
     mysql.connection.commit()
     session['editcourse']=True
     session['course_code']=course_code
-    return redirect('/add-new-course')
+    return render_template('edit-courses.html',course_code=res)
+
+# function that handles the course edit operation
+@app.route('/edit-course-data',methods=['GET','POST'])
+def editcoursedata():
+    CourseName= request.form['CourseName']
+    CourseCode = request.form['CourseCode']
+    department=request.form.get('Department')
+    Academicyear = request.form.get('Academicyear')
+    facultyid = request.form['facultyid']
+    facultyid='MCK'+facultyid
+  
+    print("The edit course data function is being executed")
+
+    cur=mysql.connection.cursor()
+    cur.execute("update courses SET Name=%s,Faculty_ID=%s,Department=%s,Academicyear=%s WHERE CourseCode=%s",(CourseName,facultyid,department,Academicyear,CourseCode))
+    #print("update courses SET CourseCode={},Name={},Faculty_ID={},Department={},Academicyear={} WHERE CourseCode={}".format(CourseCode,CourseName,facultyid,department,Academicyear,Course))
+    mysql.connection.commit()
+    session['course_editted']=True
+    return redirect('/pages-view-courses.html')
+    
 
 
 

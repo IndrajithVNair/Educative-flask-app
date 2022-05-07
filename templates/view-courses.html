@@ -381,8 +381,16 @@
     The course succesfuly deleted
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
- {{ session.pop('course_deleted',NULL)}}
+ {{ session.pop('course_deleted')}}
   {%endif%}
+
+  {%if session['course_editted']%}
+                      <div class="alert alert-primary alert-dismissible" role="alert">
+                        The course details updated
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                     {{ session.pop('course_editted')}}
+                      {%endif%}
 
   <div class="table-responsive text-nowrap">
     <table class="table">
