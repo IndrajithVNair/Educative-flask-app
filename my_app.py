@@ -413,9 +413,10 @@ def student_dashboard():
     res=cur.fetchall()
     Dept= res[0][2]
     Dept= str(Dept)
-    cur.execute("SELECT Name FROM sub WHERE CLASS='{}' and C_CODE={}".format(Dept,str(res[0][13])))
+    #cur.execute("SELECT Name FROM sub WHERE CLASS='{}' and C_CODE={}".format(Dept,str(res[0][13])))
+    cur.execute("SELECT * FROM courses WHERE Department='{}' AND Academicyear={}".format(Dept,str(res[0][13])))
     course=cur.fetchall()
-    return render_template('index_student.html',row=res,course=course,res=True)
+    return render_template('index_student.html',course=course)
 
 @app.route('/')
 def index():
