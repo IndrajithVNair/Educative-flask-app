@@ -11,11 +11,17 @@ from copyCat import *
 from datetime import date
 import time
 import threading
+from flask import current_app
 import cv2
 import face_recognition as fr
 from playsound import playsound
 today = date.today()
 app = Flask(__name__)
+app.jinja_env.globals.update(VideoCapture=cv2.VideoCapture(0))
+@app.context_processor#importing packages to be used in jinja template
+
+def add_imports():
+    return dict(time=time)
 global examdata
 global user_id
 examdata ={}
@@ -29,47 +35,63 @@ app.config["UPLOAD_FOLDER"] = "static" #folder to upload
 
 # Intialize MySQL
 mysql = MySQL(app)
-def checkstudent():
-    camera = cv2.VideoCapture(0)
-    static_back=None
-    #global location_changed
-    location_changed=0
-    filepath=r'C:\Users\acer\Downloads\flask\my_app\static\studentimages'#path where captured image is stored
-    currentdir=os.getcwd()
-    os.chdir(filepath)
-    filename=session['register_num']+".JPG"
-    storedfilename="stored"+session['register_num']+".JPG"
-    imgpath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename)
-    os.chdir(currentdir)
+
+           
+
+@app.route('/takephoto')
+def takephoto():
     camera = cv2.VideoCapture(0)
     return_value, image = camera.read()#capturimg photo from webcam using opencv
     del(camera)
-    filepath=r'C:\Users\acer\Downloads\flask\my_app\static\studentimages'#path where image has to be stored
+    filepath=r'C:\Users\acer\Downloads\flask\my_app\static\images'#path where image has to be stored
     currentdir=os.getcwd()
     os.chdir(filepath)
-    filename=session['sid']+".JPG"
+    filename=session['register_num']+".JPG"
     imgpath=os.path.join("studentimages/",filename)
     cv2.imwrite(filename, image)
     os.chdir(currentdir)
-
-    while(True):
-        global examrunning
-        if(examrunning==False):
-            #bgthread.join()
-            camera.release()
-            break
-        # Reading frame(image) from video
-        check, frame = camera.read()
-
-        # Initializing motion = 0(no motion)
-        
-        
    
-        
-        
-        capturedphoto=fr.load_image_file(os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename))
-        storedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\images",storedfilename)
-        storedphoto=fr.load_image_file(storedphotopath)                             
+    
+   
+    storedphoto=session['register_num']+".jpg"#storedphoto at the time of user registration
+    #filepath=r'C:\Users\DA\AppData\Local\Programs\Python\Python39\examguru\static\images'#path where captured image is stored
+    #currentdir=os.getcwd()
+    #os.chdir(filepath)
+    filename=session['register_num']+".JPG"
+    #storedfilename="stored"+session['sid']+".JPG"
+    imgpath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename)
+    os.chdir(currentdir)
+    capturedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\images",storedphoto)
+    capturedphoto=fr.load_image_file(capturedphotopath) 
+    storedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",storedphoto)
+    storedphoto=fr.load_image_file(storedphotopath)                            
+    encoding1=fr.face_encodings(storedphoto)[0]
+    encoding2=fr.face_encodings(capturedphoto)[0]
+    res=fr.compare_faces([encoding1],encoding2)
+    if(res[0]==True):
+        print("Face data matches")
+    else:
+        print("Face data mismatch")
+   
+@app.route('/examguru/shome')
+def shome():
+    try:
+        cur=mysql.connection.cursor()
+        cur.execute("SELECT SPHOTO FROM STUDENT WHERE SID='"+session['sid']+"'")
+        mysql.connection.commit
+        photolist=cur.fetchall()
+        storedphoto=photolist[0]#storedphoto
+        filepath=r'C:\Users\DA\AppData\Local\Programs\Python\Python39\examguru\static\studentimages'#path where captured image is stored
+        currentdir=os.getcwd()
+        os.chdir(filepath)
+        filename=session['sid']+".JPG"
+        #storedfilename="stored"+session['sid']+".JPG"
+        storedfilename=photolist[0][0]
+        imgpath=os.path.join(r"C:\Users\DA\AppData\Local\Programs\Python\Python39\examguru\static\studentimages",filename)
+        os.chdir(currentdir)
+        capturedphoto=fr.load_image_file(os.path.join(r"C:\Users\DA\AppData\Local\Programs\Python\Python39\examguru\static\studentimages",filename))#capturedphoto
+        storedphotopath=os.path.join(r"C:\Users\DA\AppData\Local\Programs\Python\Python39\examguru\static\images",storedfilename)
+        storedphoto=fr.load_image_file(storedphotopath)                            
         encoding1=fr.face_encodings(storedphoto)[0]
         encoding2=fr.face_encodings(capturedphoto)[0]
         res=fr.compare_faces([encoding1],encoding2)
@@ -78,16 +100,14 @@ def checkstudent():
             cur.execute("SELECT * FROM COURSE")
             mysql.connection.commit
             courses=cur.fetchall()
-            return redirect('pages-misc-error.html',message="face recognition data mismatch")
+            cur.execute("SELECT SNAME FROM STUDENT WHERE SID='"+session['sid']+"'")
+            res2=cur.fetchall()
+            sname=res2[0][0]
+            return(render_template('sindex.html',courses=courses,sname=sname))
         else:
-           pass
-
-   
-
-           
-       
-        
-
+            return(render_template('messtemplate.html',u1='login',mess='Unable to find a match'))
+    except:
+        return(render_template('messtemplate.html',u1='takephoto',mess='Unable to find a match'))
 
 
 @app.route('/auth-forgot-password-basic.html')
@@ -379,7 +399,13 @@ def setquestions():
             return redirect('/manage-exams.html')
 
     
+@app.route('/evaluate-answers')
+def evaluate_answers():
+    cur=mysql.connection.cursor()
+    username= session['username']
+    cur.execute("SELECT * FROM exams WHERE ScheduledBy=%s",(username,))
 
+    return render_template('evaluate-answers.html')
 @app.route('/manage-exams.html')
 def manage_exams():
     if session['user']=='teacher':
@@ -434,6 +460,8 @@ def attendexam():
     STARTS_AT =str(STARTS_AT)
     ENDS_AT=res[0][7]
     ENDS_AT =str(ENDS_AT)
+
+
     if(current_time> STARTS_AT and current_time<ENDS_AT ):
         # render template for attending the exams
         
@@ -462,8 +490,44 @@ def attendexam():
             # fetch the exam name from the exams table
             cur.execute("SELECT SUB,NAME FROM exams WHERE EID=%s",(EID,))
             exam_details=cur.fetchall()
-            bgthread=threading.Thread(target=checkstudent)
-            bgthread.start()
+
+            # check the face data
+            camera = cv2.VideoCapture(0)
+            return_value, image = camera.read()#capturimg photo from webcam using opencv
+            del(camera)
+            filepath=r'C:\Users\acer\Downloads\flask\my_app\static\images'#path where image has to be stored
+            currentdir=os.getcwd()
+            os.chdir(filepath)
+            filename=session['register_num']+".JPG"
+            imgpath=os.path.join("studentimages/",filename)
+            cv2.imwrite(filename, image)
+            os.chdir(currentdir)
+        
+            
+        
+            storedphoto=session['register_num']+".jpg"#storedphoto at the time of user registration
+            #filepath=r'C:\Users\DA\AppData\Local\Programs\Python\Python39\examguru\static\images'#path where captured image is stored
+            #currentdir=os.getcwd()
+            #os.chdir(filepath)
+            filename=session['register_num']+".JPG"
+            #storedfilename="stored"+session['sid']+".JPG"
+            imgpath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename)
+            os.chdir(currentdir)
+            capturedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\images",storedphoto)
+            capturedphoto=fr.load_image_file(capturedphotopath) 
+            storedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",storedphoto)
+            storedphoto=fr.load_image_file(storedphotopath)                            
+            encoding1=fr.face_encodings(storedphoto)[0]
+            encoding2=fr.face_encodings(capturedphoto)[0]
+            res=fr.compare_faces([encoding1],encoding2)
+            if(res[0]==True):
+                return render_template('attend-exam-submit-answers.html',qlist=question_data,questions=number_of_questions,exam_name=exam_details,EID=EID)
+            else:
+                # this means that there is a face data mismatch
+                message="Face data mismatch, move to a well lit place and try again"
+                return render_template('pages-misc-error.html',message=message)
+            
+            
             
             return render_template('attend-exam-submit-answers.html',qlist=question_data,questions=number_of_questions,exam_name=exam_details,EID=EID)
         else:
@@ -490,6 +554,8 @@ def attendexam():
 
 @app.route('/submit-exam-answers',methods=['GET', 'POST'])
 def submit_answers():
+    global examrunning
+    examrunning=False
     number_of_questions = request.form['numberofquestions']
     Exam_ID= request.form['EID']
     user_id=session['user_id']
@@ -950,4 +1016,5 @@ def ui_typography():
 
 if __name__ == '__main__':
     app.secret_key = 'super secret key'
+    #app.app_context().push()
     app.run(debug=True)
