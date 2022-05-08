@@ -564,6 +564,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
                   {%endif%}
+                {% if  session['user']=='admin'%}
                   <form id="formScheduleExam" method="POST" action="http://127.0.0.1:5000/schedule-exam">
                     <div class="row">
                       <div class="mb-3 col-md-6">
@@ -634,6 +635,59 @@
                       <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                     </div>
                   </form>
+                {% endif %}
+
+
+                {% if  session['user']=='teacher'%}
+                  <form id="formScheduleExam" method="POST" action="http://127.0.0.1:5000/schedule-exam-as-teacher">
+                    <div class="row">
+                      
+                      <div class="mb-3 col-md-6">
+                        <label for="lastName" class="form-label">Exam Name</label>
+                        <input class="form-control" type="text" name="ExamName" id="lastName" placeholder="19UBC102" />
+                      </div>
+                     
+                      
+                      <div class="mb-3">
+                        <label for="formFile" class="form-label">Upload Questions</label>
+                        <input class="form-control" type="file" id="formFile" name="QuestionPaper" />
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="address" class="form-label">Date</label>
+                        <input class="form-control" type="date" value="2021-06-18" id="html5-date-input" name="Date"/>
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="state" class="form-label">Start Time</label>
+                        <input class="form-control" type="time" value="12:30:00" id="html5-time-input" name="StartAt"/>
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="state" class="form-label">End Time</label>
+                        <input class="form-control" type="time" value="12:30:00" id="html5-time-input" name="EndAt"/>
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="zipCode" class="form-label">Duration (Minutes)</label>
+                        <input class="form-control" type="number" value="30" id="html5-number-input" name="Duration"/>
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="zipCode" class="form-label">Number of Questions</label>
+                        <input class="form-control" type="number" value="4" id="html5-number-input" name="questions"/>
+                      </div>
+                    
+                    <div class="mt-2">
+                     
+                      <button type="submit" class="btn btn-primary me-2">Next</button>
+                  
+                      <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                    </div>
+                  </form>
+                {% endif %}
+
+                
+
+
+                
+
+
                 </div>
                 </div>
             </div>

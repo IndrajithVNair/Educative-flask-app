@@ -112,7 +112,18 @@ def form_layouts_vertica():
 
 @app.route('/forms-basic-inputs.html')
 def forms_basic_inputs():
-    return render_template('forms-basic-inputs.html')
+    if session['user']=='teacher':
+        global examdata
+        examdata.clear()
+
+        examdata['CourseCode']=request.args.get('CourseCode')
+        examdata['CourseName']=request.args.get('CourseName')
+        examdata['Department']=request.args.get('Dept')
+        examdata['Academicyear']=request.args.get('Academicyear')
+        print("exam data: ",examdata)
+        return render_template('forms-basic-inputs.html')
+    else:
+        return render_template('forms-basic-inputs.html')
 
 @app.route('/forms-input-groups.html')
 def forms_input_groups():
@@ -177,7 +188,10 @@ def admin_dashboard():
 
 @app.route('/teacher-dashboard')
 def teacher_dashboard():
-    return render_template('index_teacher.html')
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM courses WHERE Faculty_ID=%s",(session['register_num'],))
+    res=cur.fetchall()
+    return render_template('index_teacher.html',course_details=res)
 
 @app.route('/schedule-exam',methods=['GET', 'POST'])
 def exam_schedule():
@@ -196,6 +210,45 @@ def exam_schedule():
     number_of_questions=int(number_of_questions)
     print(faculty)
     global examdata
+
+    examdata['Subject']=SubjectName
+    examdata['Exam']=ExamName
+    examdata['Department']=department
+    examdata['Academicyear']=Academicyear
+    examdata['Date']=Date
+    examdata['StartAt']=StartAt
+    examdata['faculty']=faculty
+
+    cur=mysql.connection.cursor()
+    cur.execute("INSERT INTO exams(NAME,SUB,Dept,Academicyear,Date,STARTS_AT,ENDS_AT,Duration,ScheduledBy) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ",(ExamName,SubjectName,department,Academicyear,Date,StartAt,EndAt,Duration,faculty))
+    mysql.connection.commit()
+    return render_template('/set-questions.html',res=True,questions=number_of_questions)
+
+
+@app.route('/schedule-exam-as-teacher',methods=['GET', 'POST'])
+def teacher_exam_schedule():
+    #SubjectName=request.form['SubjectName']
+    ExamName=request.form['ExamName']
+    #department=request.form['Department']
+    #Academicyear=request.form['Academicyear']
+    QuestionPaper=request.form['QuestionPaper']
+    Date=request.form['Date']
+    StartAt=request.form['StartAt']
+    EndAt=request.form['EndAt']
+    Duration=request.form['Duration']
+    mysql.connection.commit()
+    faculty=session.get('username')
+    number_of_questions=request.form['questions']
+    number_of_questions=int(number_of_questions)
+    print(faculty)
+    global examdata
+
+   
+    SubjectName= examdata['CourseName']
+    department= examdata['Department']
+    Academicyear= examdata['Academicyear']
+
+
 
     examdata['Subject']=SubjectName
     examdata['Exam']=ExamName
@@ -308,7 +361,10 @@ def setquestions():
         mysql.connection.commit()
         question_number+=1
         session['ExamAdded']=True
-    return redirect('/manage-exams.html')
+        if session['user']=='teacher':
+            return redirect('/teacher-dashboard')
+        else:
+            return redirect('/manage-exams.html')
 
     
 
