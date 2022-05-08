@@ -237,7 +237,7 @@ def editexamdata():
     number_of_questions=int(number_of_questions)
 
     cur=mysql.connection.cursor()
-    cur.execute("update exams SET NAME=%s,SUB=%s,Dept=%s,Academicyear=%s,Date=%s, STARTS_AT=%s, ENDS_AT=%s,Duration=%s,ScheduledBy=%s ,Status=1 WHERE EID=%s",(ExamName,SubjectName,department,Academicyear,Date,StartAt,EndAt,Duration,faculty,EID))
+    cur.execute("update exams SET NAME=%s,SUB=%s,Dept=%s,Academicyear=%s,Date=%s, STARTS_AT=%s, ENDS_AT=%s,Duration=%s,ScheduledBy=%s ,Status=0 WHERE EID=%s",(ExamName,SubjectName,department,Academicyear,Date,StartAt,EndAt,Duration,faculty,EID))
     #print("update exam SET NAME={},SUB={},Dept={},Academicyear={}".format(ExamName,SubjectName,department,Academicyear,Date,StartAt,EndAt,Duration,faculty))
     
     mysql.connection.commit()
@@ -376,14 +376,18 @@ def attendexam():
             mysql.connection.commit()
             # fetch the questions for the exam
             cur.execute("SELECT Question_Text FROM exam_data WHERE EID=%s",(EID,))
-            res=cur.fetchall()
+            question_data=cur.fetchall()
             res=cur.execute("SELECT Question_Number FROM exam_data WHERE EID=%s",(EID,))
             number_of_questions=res
             print("number of questions:",number_of_questions)
             global examrunning
             examrunning=True
-            bgthread.start()
-            return render_template('attend-exam-submit-answers.html',qlist=res,questions=number_of_questions)
+            # fetch the exam name from the exams table
+            cur.execute("SELECT SUB,NAME FROM exams WHERE EID=%s",(EID,))
+            exam_details=cur.fetchall()
+            #bgthread.start()
+            
+            return render_template('attend-exam-submit-answers.html',qlist=question_data,questions=number_of_questions,exam_name=exam_details,EID=EID)
         else:
             # this means that the user has already attempted the exam
             message="You have already attempted the exam"
@@ -406,6 +410,31 @@ def attendexam():
     
     
 
+@app.route('/submit-exam-answers',methods=['GET', 'POST'])
+def submit_answers():
+    number_of_questions = request.form['numberofquestions']
+    Exam_ID= request.form['EID']
+    user_id=session['user_id']
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT RegisterNum FROM users WHERE Id=%s",(user_id,))
+    RegisterNum= cur.fetchall()
+
+    number_of_questions = int(number_of_questions)
+    answers = []
+   
+    for i in range(1,number_of_questions+1):
+        num=str(i)
+        answers.append(request.form['answer'+num])
+
+    # insert the questions into exam_data table
+    question_number=1
+    for i in answers:
+        cur=mysql.connection.cursor()
+        cur.execute("INSERT INTO exam_answers (EID,Question_Number,Answer_Text,RollNumber) VALUES (%s,%s,%s,%s)",(Exam_ID,question_number,i,RegisterNum[0][0]))
+        mysql.connection.commit()
+        question_number+=1
+        session['ExamAttended']=True
+    return redirect('/attend-exams')
 
 
 
