@@ -27,7 +27,7 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
 
-    <title>Account settings - Pages | Sneat - Bootstrap 5 HTML Admin Template - Pro</title>
+    <title>Edit exam</title>
 
     <meta name="description" content="" />
 
@@ -67,9 +67,9 @@
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
-      <!-- Menu -->
+       <!-- Menu -->
 
-      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+       <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
         <div class="app-brand demo">
           <a href="index.html" class="app-brand-link">
             <span class="app-brand-logo demo">
@@ -555,78 +555,91 @@
             <!-- Content -->
 
             <div class="container-xxl flex-grow-1 container-p-y">
-              <h4 class="fw-bold py-3 mb-4">
-                <span class="text-muted fw-light">Exams / </span> Manage Exams
-              </h4>
- <!-- Basic Bootstrap Table -->
- <div class="card">
-  <h5 class="card-header">Online Exams</h5>
-  {%if session['exam_deleted']%}
-  <div class="alert alert-primary alert-dismissible" role="alert">
-    The exam succesfuly deleted
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-  {%endif%}
-
-  {%if session['ExamAdded']%}
+              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Exams /</span> Edit exam</h4>
+              <div class="card mb-4">
+                <div class="card-body">
+                  {%if res%}
                   <div class="alert alert-primary alert-dismissible" role="alert">
-                    Questions added successfully!
+                    Exam scheduled!
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
                   {%endif%}
-  <div class="table-responsive text-nowrap">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Subject</th>
-          <th>Name</th>
-          <th>Date</th>
-          <th>Starts at</th>
-          <th>Ends at</th>
-          <th>Duration</th>
-          <th>Scheduled by</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody class="table-border-bottom-0">
-        {%for r in elist %}
-                      <tr>
-                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> {{r[1]}}</td>
-                        <td>{{r[2]}}</td>
-                        <td><span class="">{{r[5]}}</span></td>
-                        <td>{{r[6]}}</td>
-                        <td>{{r[7]}}</td>
-                        <td>{{r[8]}}</td>
-                        <td>{{r[9]}}</td>
-                      
-                        <td> <div class="col-4 col-sm-5 text-end">
-                          
-                          <div class="dropdown">
-                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                              <i class="bx bx-dots-vertical-rounded"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                              <a class="dropdown-item" href="{{url_for('editexam',EID=r[0])}}"
-                                >
-                                <i class="bx bx-edit-alt me-1"></i> Edit</a
-                              >
-                              <a class="dropdown-item" href="{{url_for('deleteexam',EID=r[0])}}" 
-                                ><i class="bx bx-trash me-1"></i> Delete</a
-                              >
-                            </div>
-                          </div>
-                      </td>
-                      </tr>
-                      {%endfor%}
-      </tbody>
-    </table>
-  </div>
-</div>
-<!--/ Basic Bootstrap Table -->
+                  <form id="formScheduleExam" method="POST" action="http://127.0.0.1:5000/edit-exam-data">
+                    <div class="row">
+                      <div class="mb-3 col-md-6">
+                        <label for="Name" class="form-label">Subject name</label>
+                        <input
+                          class="form-control"
+                          type="text"
+                          id="firstName"
+                          name="SubjectName"
+                          value="{{exam_data[0][2]}}"
+                          autofocus
+                        />
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="lastName" class="form-label">Exam Name</label>
+                        <input class="form-control" type="text" name="ExamName" id="lastName"  value="{{exam_data[0][1]}}" />
+                      </div>
+                     
+                      <div class="mb-3 col-md-6">
+                        <label for="exampleFormControlSelect1" class="form-label">Department</label>
+                        <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" name="Department">
+                          <option selected>Select department from the list</option>
+                          <option value="BCA">BCA</option>
+                          <option value="BBA">BBA</option>
+                          <option value="BCOM">BCOM</option>
+                          <option value="BSW">BSW</option>
+                        </select>
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="exampleFormControlSelect1" class="form-label">Academic Year</label>
+                        <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" name="Academicyear">
+                          <option selected>Select academic year from the list</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                         
+                        </select>
+                      </div>
+                      <div class="mb-3">
+                        <label for="formFile" class="form-label">Upload Questions</label>
+                        <input class="form-control" type="file" id="formFile" name="QuestionPaper" />
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="address" class="form-label">Date</label>
+                        <input class="form-control" type="date"  value="{{exam_data[0][5]}}" id="html5-date-input" name="Date"/>
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="state" class="form-label">Start Time</label>
+                        <input class="form-control" type="time"  value="{{exam_data[0][6]}}" id="html5-time-input" name="StartAt"/>
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="state" class="form-label">End Time</label>
+                        <input class="form-control" type="time" value="{{exam_data[0][7]}}" id="html5-time-input" name="EndAt"/>
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="zipCode" class="form-label">Duration (Minutes)</label>
+                        <input class="form-control" type="number" value="{{exam_data[0][8]}}" id="html5-number-input" name="Duration"/>
+                      </div>
+                      <div class="mb-3 col-md-6">
+                        <label for="zipCode" class="form-label">Number of Questions</label>
+                        <input class="form-control" type="number" value="4" id="html5-number-input" name="questions"/>
+                      </div>
+                    
+                    <div class="mt-2">
+                     
+                      <button type="submit" class="btn btn-primary me-2">Next</button>
+                  
+                      <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                    </div>
+                  </form>
+                </div>
+                </div>
             </div>
             <!-- / Content -->
 
-           
+
             <div class="content-backdrop fade"></div>
           </div>
           <!-- Content wrapper -->
@@ -657,6 +670,8 @@
     <script src="../static/js/000070main.js"></script>
 
     <!-- Page JS -->
+
+    <script src="../static/js/000069form-basic-inputs.js"></script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>

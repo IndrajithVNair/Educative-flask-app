@@ -210,6 +210,69 @@ def exam_schedule():
     mysql.connection.commit()
     return render_template('/set-questions.html',res=True,questions=number_of_questions)
     
+@app.route('/edit-exam')
+def editexam():
+     EID=request.args.get('EID')
+     cur=mysql.connection.cursor()
+     cur.execute("SELECT * FROM exams WHERE EID=%s",(EID,))
+     res=cur.fetchall()
+     session['EID']=EID
+     return render_template('/edit-exam.html',EID=EID,exam_data=res)
+
+@app.route('/edit-exam-data',methods=['GET', 'POST'])
+def editexamdata():
+    EID=session['EID']
+    SubjectName=request.form['SubjectName']
+    ExamName=request.form['ExamName']
+    department=request.form['Department']
+    Academicyear=request.form['Academicyear']
+    QuestionPaper=request.form['QuestionPaper']
+    Date=request.form['Date']
+    StartAt=request.form['StartAt']
+    EndAt=request.form['EndAt']
+    Duration=request.form['Duration']
+    mysql.connection.commit()
+    faculty=session.get('username')
+    number_of_questions=request.form['questions']
+    number_of_questions=int(number_of_questions)
+
+    cur=mysql.connection.cursor()
+    cur.execute("update exams SET NAME=%s,SUB=%s,Dept=%s,Academicyear=%s,Date=%s, STARTS_AT=%s, ENDS_AT=%s,Duration=%s,ScheduledBy=%s ,Status=1 WHERE EID=%s",(ExamName,SubjectName,department,Academicyear,Date,StartAt,EndAt,Duration,faculty,EID))
+    #print("update exam SET NAME={},SUB={},Dept={},Academicyear={}".format(ExamName,SubjectName,department,Academicyear,Date,StartAt,EndAt,Duration,faculty))
+    
+    mysql.connection.commit()
+
+    cur.execute("SELECT * from exam_data WHERE EID=%s",(EID,))
+    res=cur.fetchall()
+    return render_template('edit-questions.html',res=True,questions=number_of_questions,question_data=res)
+
+
+@app.route('/update-exam-questions',methods=['GET', 'POST'])
+def update_exam_questions():
+    number_of_questions = request.form['numberofquestions']
+    number_of_questions = int(number_of_questions)
+    questions = []
+   
+    for i in range(1,number_of_questions+1):
+        num=str(i)
+        questions.append(request.form['question'+num])
+    # delete the rows of EID in the exam_data 
+    EID=session['EID']
+    cur=mysql.connection.cursor()
+    cur.execute('delete from exam_data where EID=%s',(EID,))
+
+    question_number=1
+    for i in questions:
+        cur=mysql.connection.cursor()
+        cur.execute("INSERT INTO exam_data (EID,Question_Number,Question_Text) VALUES (%s,%s,%s)",(EID,question_number,i))
+        mysql.connection.commit()
+        question_number+=1
+        session['ExamAdded']=True
+    return redirect('/manage-exams.html')
+
+
+
+
 @app.route('/set-exam-questions',methods=['GET', 'POST'])
 def setquestions():
     number_of_questions = request.form['numberofquestions']
