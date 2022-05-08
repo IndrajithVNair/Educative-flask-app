@@ -19,6 +19,7 @@ app = Flask(__name__)
 global examdata
 global user_id
 examdata ={}
+examrunning = False
 # Enter your database connection details below
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -29,7 +30,6 @@ app.config["UPLOAD_FOLDER"] = "static" #folder to upload
 # Intialize MySQL
 mysql = MySQL(app)
 def checkstudent():
-    return "Hi"
     camera = cv2.VideoCapture(0)
     static_back=None
     #global location_changed
@@ -382,13 +382,22 @@ def setquestions():
 
 @app.route('/manage-exams.html')
 def manage_exams():
+    if session['user']=='teacher':
+        cur=mysql.connection.cursor()
+        username=session['username']
+        cur.execute("SELECT * FROM exams where Status=0 AND ScheduledBy=%s",(username,))
+        res=cur.fetchall()
+        mysql.connection.commit()
+        return render_template('manage-exams.html',elist=res,ExamAdded=False)
+    else:
+
+        # this should be executed only if the user is admin
+        cur=mysql.connection.cursor()
+        cur.execute("SELECT * FROM exams where Status=0")
+        res=cur.fetchall()
+        mysql.connection.commit()
     
-    cur=mysql.connection.cursor()
-    cur.execute("SELECT * FROM exams where Status=0")
-    res=cur.fetchall()
-    mysql.connection.commit()
-    
-    return render_template('manage-exams.html',elist=res,ExamAdded=False)
+        return render_template('manage-exams.html',elist=res,ExamAdded=False)
 @app.route('/attend-exams')
 def attend_exams():
     cur=mysql.connection.cursor()

@@ -566,6 +566,7 @@
     The exam succesfuly deleted
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
+  {{ session.pop('exam_deleted')}}
   {%endif%}
 
   {%if session['ExamAdded']%}
@@ -573,6 +574,7 @@
                     Questions added successfully!
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
+              {{session.pop('ExamAdded')}}
                   {%endif%}
   <div class="table-responsive text-nowrap">
     <table class="table">
