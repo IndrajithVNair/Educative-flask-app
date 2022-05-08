@@ -1,4 +1,5 @@
 from asyncio.windows_events import NULL
+from werkzeug.utils import secure_filename
 from distutils.log import debug
 from flask import Flask, render_template,request,redirect,session,Response,url_for,flash,send_file
 from flask_mysqldb import MySQL
@@ -28,34 +29,45 @@ app.config["UPLOAD_FOLDER"] = "static" #folder to upload
 # Intialize MySQL
 mysql = MySQL(app)
 def checkstudent():
-    
-    break_outer=False
-    ismoved=False
-    frame2=None
+    return "Hi"
+    camera = cv2.VideoCapture(0)
+    static_back=None
     #global location_changed
     location_changed=0
-    global examrunning            
-    if(examrunning==False):
-        break_outer=True
+    filepath=r'C:\Users\acer\Downloads\flask\my_app\static\studentimages'#path where captured image is stored
+    currentdir=os.getcwd()
+    os.chdir(filepath)
+    filename=session['register_num']+".JPG"
+    storedfilename="stored"+session['register_num']+".JPG"
+    imgpath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename)
+    os.chdir(currentdir)
+    camera = cv2.VideoCapture(0)
+    return_value, image = camera.read()#capturimg photo from webcam using opencv
+    del(camera)
+    filepath=r'C:\Users\acer\Downloads\flask\my_app\static\studentimages'#path where image has to be stored
+    currentdir=os.getcwd()
+    os.chdir(filepath)
+    filename=session['sid']+".JPG"
+    imgpath=os.path.join("studentimages/",filename)
+    cv2.imwrite(filename, image)
+    os.chdir(currentdir)
+
     while(True):
-        filepath=r'C:\Users\acer\Downloads\flask\my_app\static\studentimages'#path where captured image is stored
-        currentdir=os.getcwd()
-        os.chdir(filepath)
-        filename=session['register_num']+".JPG"
-        storedfilename="stored"+session['register_num']+".JPG"
-        imgpath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename)
-        os.chdir(currentdir)
-        camera = cv2.VideoCapture(0)
-        return_value, image = camera.read()#capturimg photo from webcam using opencv
-        del(camera)
-        filepath=r'C:\Users\acer\Downloads\flask\my_app\static\studentimages'#path where image has to be stored
-        currentdir=os.getcwd()
-        os.chdir(filepath)
-        filename=session['sid']+".JPG"
-        imgpath=os.path.join("studentimages/",filename)
-        cv2.imwrite(filename, image)
-        os.chdir(currentdir)
-        capturedphoto=fr.load_image_file(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages\19UBC129.JPG")#capturedphoto
+        global examrunning
+        if(examrunning==False):
+            #bgthread.join()
+            camera.release()
+            break
+        # Reading frame(image) from video
+        check, frame = camera.read()
+
+        # Initializing motion = 0(no motion)
+        
+        
+   
+        
+        
+        capturedphoto=fr.load_image_file(os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename))
         storedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\images",storedfilename)
         storedphoto=fr.load_image_file(storedphotopath)                             
         encoding1=fr.face_encodings(storedphoto)[0]
@@ -76,7 +88,7 @@ def checkstudent():
        
         
 
-bgthread=threading.Thread(target=checkstudent)
+
 
 @app.route('/auth-forgot-password-basic.html')
 def auth_forgot_password_basic():
@@ -441,7 +453,8 @@ def attendexam():
             # fetch the exam name from the exams table
             cur.execute("SELECT SUB,NAME FROM exams WHERE EID=%s",(EID,))
             exam_details=cur.fetchall()
-            #bgthread.start()
+            bgthread=threading.Thread(target=checkstudent)
+            bgthread.start()
             
             return render_template('attend-exam-submit-answers.html',qlist=question_data,questions=number_of_questions,exam_name=exam_details,EID=EID)
         else:
@@ -572,8 +585,14 @@ def index():
 
 @app.route('/user-register',methods=['GET','POST'])
 def user_register():
-    name=request.form['Name']
+    sphoto=request.files['sphoto']
     register_num=request.form['RegisterNumber']
+    path = "C:\\Users\\acer\\Downloads\\flask\\my_app\\static\\studentimages"
+    filename = secure_filename(register_num+".JPG")
+    sphoto.save(os.path.join(path, filename))
+
+    name=request.form['Name']
+    
     email=request.form['email']
     phone=request.form['phoneNumber']
     password=request.form['Password']
