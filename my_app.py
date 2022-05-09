@@ -419,6 +419,7 @@ def see_attended():
     attended_count=len(attended)
     register_num=[]
     names=[]
+    marks={}
     print("EID: ",EID)
     for i in range(len(attended)):
         # fetching the register number of the students who attended the exam
@@ -431,22 +432,64 @@ def see_attended():
         #fetching the name of the students who attended the exam
         cur.execute("SELECT Name FROM users WHERE Id=%s",(user_id,))
         names.append(cur.fetchall())
+
+    # if mark is recorded for the student for the exam id, display it
+    mark=0
+    for i in range(len(register_num)):
+        RollNumber=register_num[i][0][0]
+        
+       
+        
+        cur=mysql.connection.cursor()
+        cur.execute("SELECT Marks FROM exam_marks WHERE EID=%s AND RollNumber=%s",(EID,RollNumber))
+        res=cur.fetchall()
+        
+        mysql.connection.commit()
+
+        print("Marks data: ",res)
+        
+        if not RollNumber in marks:
+            marks[RollNumber]=res
+        elif RollNumber in marks:
+            score=marks[RollNumber]
+            score= int(score)
+            score+=res
+            marks[RollNumber]=score
+
+    print("marks: ",marks)
+
+
+
+
+
+
     session['EID']=EID
     register_num=tuple(register_num)
     names=tuple(names)
 
-    return render_template('see-attended.html',attended_count=attended_count,register_num=register_num,name=names)
+    return render_template('see-attended.html',attended_count=attended_count,register_num=register_num,name=names,marks=marks)
 
 
 @app.route('/view-uploaded-answers',methods=['POST', 'GET'])
 def view_uploaded_answers():
     cur=mysql.connection.cursor()
-    RollNumber= request.args.get('register_num')
+    RollNumber= request.args.get('RegisterNum')
+    Name= request.args.get('Name')
     EID= session['EID']
+
+    #fetch the answers
     cur.execute("SELECT * FROM exam_answers WHERE EID=%s AND RollNumber=%s",(EID,RollNumber,))
     res=cur.fetchall()
+    answers=res
+    #print("answers: ",answers)
 
-    return render_template('view-uploaded-asnwers.html')
+    #fetch the questions
+    cur.execute("SELECT Question_Text FROM exam_data WHERE EID=%s",(EID,))
+    res=cur.fetchall()
+    qlist=res
+    questions=len(res)
+    #print("questions: ",questions)
+    return render_template('view-uploaded-asnwers.html',answer=answers,Name=Name,questions=questions,qlist=qlist,RollNumber=RollNumber)
 
 
 
@@ -623,6 +666,38 @@ def submit_answers():
         question_number+=1
         session['ExamAttended']=True
     return redirect('/attend-exams')
+
+@app.route('/submit-exam-marks',methods=['GET','POST'])
+def submit_exam_marks():
+    number_of_questions = request.form['numberofquestions']
+    Exam_ID= request.form['EID']
+    RollNumber= request.form['RollNumber']
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT * FROM attended_list WHERE EID=%s",(Exam_ID,))
+    attended=cur.fetchall()
+    attended_count=len(attended)
+
+    RollNumber=RollNumber.strip()
+
+    number_of_questions = int(number_of_questions)
+    marks = []
+
+
+    for i in range(1,number_of_questions+1):
+        num=str(i)
+        marks.append(request.form['mark'+num])
+
+
+    # insert the answers into exam_marks table
+    question_number=1
+    for i in marks:
+        cur=mysql.connection.cursor()
+        cur.execute("INSERT INTO exam_marks (EID,RollNumber,QuestionNumber,Marks) VALUES (%s,%s,%s,%s)",(Exam_ID,RollNumber,question_number,i,))
+        mysql.connection.commit()
+        question_number+=1
+        session['MarksAdded']=True
+    
+    return redirect('/list-exams')
 
 
 

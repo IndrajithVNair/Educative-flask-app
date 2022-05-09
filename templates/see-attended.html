@@ -369,6 +369,8 @@
                               <th>Name</th>
                               <th>Register Number</th>
                               <th>View responses</th>
+                              <th>Marks</th>
+
                              
                             </tr>
                           </thead>
@@ -382,11 +384,13 @@
 
                   
                               <td> 
-                                    <a class="dropdown-item"href="{{url_for('view_uploaded_answers',RegisterNum=register_num[r][0][0])}}"
+                                    <a class="dropdown-item"href="{{url_for('view_uploaded_answers',RegisterNum=register_num[r][0][0],Name=name[r][0][0])}}"
                                       > View uploaded answers
                                      
                                   
                                  </td>
+
+                                <td>NULL</td>
                           
                             </tr>
                             {%endfor%}
