@@ -443,18 +443,23 @@ def see_attended():
         cur=mysql.connection.cursor()
         cur.execute("SELECT Marks FROM exam_marks WHERE EID=%s AND RollNumber=%s",(EID,RollNumber))
         res=cur.fetchall()
-        
+        Totalmarks=0
+        for i in res:
+            print("Marks data: ",i[0])
+            Totalmarks+=i[0]
+            if not RollNumber in marks:
+                marks[RollNumber]=i[0]
+            elif RollNumber in marks:
+                score=marks[RollNumber]
+                score= int(score)
+                score+=i[0]
+                marks[RollNumber]=score
+
         mysql.connection.commit()
 
-        print("Marks data: ",res)
+      
         
-        if not RollNumber in marks:
-            marks[RollNumber]=res
-        elif RollNumber in marks:
-            score=marks[RollNumber]
-            score= int(score)
-            score+=res
-            marks[RollNumber]=score
+        
 
     print("marks: ",marks)
 
