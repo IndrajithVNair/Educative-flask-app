@@ -597,21 +597,27 @@ def attendexam():
         
             
         
-            storedphoto=session['register_num']+".jpg"#storedphoto at the time of user registration
-            #filepath=r'C:\Users\DA\AppData\Local\Programs\Python\Python39\examguru\static\images'#path where captured image is stored
-            #currentdir=os.getcwd()
-            #os.chdir(filepath)
-            filename=session['register_num']+".JPG"
-            #storedfilename="stored"+session['sid']+".JPG"
-            imgpath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename)
-            os.chdir(currentdir)
-            capturedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\images",storedphoto)
-            capturedphoto=fr.load_image_file(capturedphotopath) 
-            storedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",storedphoto)
-            storedphoto=fr.load_image_file(storedphotopath)                            
-            encoding1=fr.face_encodings(storedphoto)[0]
-            encoding2=fr.face_encodings(capturedphoto)[0]
-            res=fr.compare_faces([encoding1],encoding2)
+            try:
+                storedphoto=session['register_num']+".jpg"#storedphoto at the time of user registration
+                #filepath=r'C:\Users\DA\AppData\Local\Programs\Python\Python39\examguru\static\images'#path where captured image is stored
+                #currentdir=os.getcwd()
+                #os.chdir(filepath)
+                filename=session['register_num']+".JPG"
+                #storedfilename="stored"+session['sid']+".JPG"
+                imgpath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",filename)
+                os.chdir(currentdir)
+                capturedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\images",storedphoto)
+                capturedphoto=fr.load_image_file(capturedphotopath) 
+                storedphotopath=os.path.join(r"C:\Users\acer\Downloads\flask\my_app\static\studentimages",storedphoto)
+                storedphoto=fr.load_image_file(storedphotopath)                            
+                encoding1=fr.face_encodings(storedphoto)[0]
+                encoding2=fr.face_encodings(capturedphoto)[0]
+                res=fr.compare_faces([encoding1],encoding2)
+            except:
+                message="Face data mismatch, move to a well lit place and try again"
+                return render_template('pages-misc-error.html',message=message)
+                
+
             if(res[0]==True):
                 return render_template('attend-exam-submit-answers.html',qlist=question_data,questions=number_of_questions,exam_name=exam_details,EID=EID)
             else:
@@ -802,7 +808,7 @@ def user_register():
     address=request.form['address']
     age=request.form['Age']
     role=2
-    account_status=0
+    account_status=1
     cls=1
     cur=mysql.connection.cursor()
     cur.execute("INSERT INTO users(Name,Dept,Age,Password,email,phone,Address,Role,account_status,State,Country,Zipcode,Class,RegisterNum) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(name,department,age,password,email,phone,address,role,account_status,state,country,zipcode,cls,register_num))
@@ -852,7 +858,7 @@ def editaccount():
     rid=request.args.get('rid')
     # fetching details of the account
     cur=mysql.connection.cursor()
-    cur.execute("SELECT * FROM users WHERE Id=%s",rid)
+    cur.execute("SELECT * FROM users WHERE Id=%s",(rid,))
     res=cur.fetchall()
     mysql.connection.commit()
     return render_template('pages-account-settings-edit.html',rlist=res)
@@ -1041,7 +1047,7 @@ def approveaccount():
     # fetching Id
     rid=request.args.get('rid')
     cur=mysql.connection.cursor()
-    cur.execute(" UPDATE users SET account_status=2 WHERE Id=%s",rid)
+    cur.execute(" UPDATE users SET account_status=2 WHERE Id=%s",(rid,))
     mysql.connection.commit()
     return(redirect(url_for('pages_account_settings_notifications')))
 
