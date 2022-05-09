@@ -18,7 +18,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Account settings - Pages | Sneat - Bootstrap 5 HTML Admin Template - Pro</title>
+    <title>Evaluate answers</title>
 
     <meta name="description" content="" />
 
@@ -365,51 +365,28 @@
                         <table class="table table-hover">
                           <thead>
                             <tr>
-                              <th>EID</th>
+                              <th>Sl No</th>
                               <th>Name</th>
-                              <th>Dept</th>
-                              <th>Academic year</th>
-                              <th>Attended</th>
-                              <th>Actions</th>
+                              <th>Register Number</th>
+                              <th>View responses</th>
+                             
                             </tr>
                           </thead>
                           <tbody class="table-border-bottom-0">
-                            {%for r in rlist %}
+                            {%for r in range(attended_count) %}
                             <tr>
-                              <td>{{r[14]}}</td>
-                              <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{r[1]}}</strong></td>
-                              <td>{{r[2]}}</td>
-
-                               {%if r[8]==0 %}
-                                 <td>Admin</td>
-                                 {%endif%} 
-                                {%if r[8]==1%}
-                                  <td>Teacher</td>
-                                  {%endif%} 
-                                {%if r[8]==2%}
-                                  <td>Student</td>
-                                  {%endif%} 
-                                
-
+                              <td>{{r+1}}</td>
                               
-                              <td><span class="badge bg-label-primary me-1">Inactive</span></td>
-                              <td> <div class="col-4 col-sm-5 text-end">
-                                <div class="dropdown">
-                                  <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                    <i class="bx bx-dots-vertical-rounded"></i>
-                                  </button>
-                                  <div class="dropdown-menu">
-                                    <a class="dropdown-item"href="{{url_for('approveaccount',rid=r[0])}}"
-                                      >
-                                      <i class="bx bx-edit-alt me-1"></i> Verify</a
-                                    >
-                                    <a class="dropdown-item" href="{{url_for('deleteaccount',rid=r[0])}}" 
-                                      ><i class="bx bx-trash me-1"></i> Delete</a
-                                    >
-                                  </div>
-                                </div>
-                                </button>
-                              </div></td>
+                              <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{name[r][0][0]}}</strong></td>
+                              <td>{{register_num[r][0][0]}}</td>
+
+                  
+                              <td> 
+                                    <a class="dropdown-item"href="{{url_for('view_uploaded_answers',RegisterNum=register_num[r][0][0])}}"
+                                      > View uploaded answers
+                                     
+                                  
+                                 </td>
                           
                             </tr>
                             {%endfor%}

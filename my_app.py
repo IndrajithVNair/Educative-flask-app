@@ -1,4 +1,5 @@
 from asyncio.windows_events import NULL
+from atexit import register
 from werkzeug.utils import secure_filename
 from distutils.log import debug
 from flask import Flask, render_template,request,redirect,session,Response,url_for,flash,send_file
@@ -399,13 +400,56 @@ def setquestions():
             return redirect('/manage-exams.html')
 
     
-@app.route('/evaluate-answers')
+@app.route('/list-exams')
 def evaluate_answers():
     cur=mysql.connection.cursor()
     username= session['username']
     cur.execute("SELECT * FROM exams WHERE ScheduledBy=%s",(username,))
+    res=cur.fetchall()
+    return render_template('list-exams.html',examlist=res)
 
-    return render_template('evaluate-answers.html')
+
+
+@app.route('/see-attended')
+def see_attended():
+    EID=request.args.get('EID')
+    cur= mysql.connection.cursor()
+    cur.execute("SELECT * FROM attended_list WHERE EID=%s",(EID,))
+    attended=cur.fetchall()
+    attended_count=len(attended)
+    register_num=[]
+    names=[]
+    print("EID: ",EID)
+    for i in range(len(attended)):
+        # fetching the register number of the students who attended the exam
+        user_id=attended[i][2]
+        print(user_id)
+        cur.execute("SELECT RegisterNum FROM users WHERE Id=%s",(user_id,))
+        register_num.append(cur.fetchall())
+       
+
+        #fetching the name of the students who attended the exam
+        cur.execute("SELECT Name FROM users WHERE Id=%s",(user_id,))
+        names.append(cur.fetchall())
+    session['EID']=EID
+    register_num=tuple(register_num)
+    names=tuple(names)
+
+    return render_template('see-attended.html',attended_count=attended_count,register_num=register_num,name=names)
+
+
+@app.route('/view-uploaded-answers',methods=['POST', 'GET'])
+def view_uploaded_answers():
+    cur=mysql.connection.cursor()
+    RollNumber= request.args.get('register_num')
+    EID= session['EID']
+    cur.execute("SELECT * FROM exam_answers WHERE EID=%s AND RollNumber=%s",(EID,RollNumber,))
+    res=cur.fetchall()
+
+    return render_template('view-uploaded-asnwers.html')
+
+
+
 @app.route('/manage-exams.html')
 def manage_exams():
     if session['user']=='teacher':
